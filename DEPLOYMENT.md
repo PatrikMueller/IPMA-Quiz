@@ -28,15 +28,16 @@ Branch names are automatically sanitized (special characters become hyphens, low
 
 1. Go to your repository on GitHub
 2. Navigate to **Settings** → **Pages**
-3. Under "Source", select **Deploy from a branch**
-4. Choose **gh-pages** branch and **/ (root)** folder
-5. Click **Save**
+3. Under "Source", select **GitHub Actions**
+4. Click **Save**
+
+**Note**: This setup uses the modern GitHub Actions deployment method, not the legacy branch-based deployment.
 
 ### 2. Configure Action Permissions
 
 1. Go to **Settings** → **Actions** → **General**
 2. Under "Workflow permissions":
-   - Select **Read and write permissions**
+   - Select **Read and write permissions** 
    - Check **Allow GitHub Actions to create and approve pull requests**
 3. Click **Save**
 

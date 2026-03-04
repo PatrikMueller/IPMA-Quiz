@@ -45,7 +45,7 @@ jobs:
     if: github.event_name != 'delete'
     
     permissions:
-      contents: read
+      contents: write
       pages: write
       id-token: write
       pull-requests: write
@@ -72,10 +72,12 @@ jobs:
           if [ "${{ github.ref }}" = "refs/heads/main" ] || [ "${{ github.ref }}" = "refs/heads/master" ]; then
             echo "name=" >> $GITHUB_OUTPUT
             echo "path=" >> $GITHUB_OUTPUT
+            echo "is_main=true" >> $GITHUB_OUTPUT
           else
             branch_name=$(echo ${GITHUB_REF#refs/heads/} | sed 's/[^a-zA-Z0-9]/-/g' | tr '[:upper:]' '[:lower:]')
             echo "name=$branch_name" >> $GITHUB_OUTPUT
             echo "path=$branch_name/" >> $GITHUB_OUTPUT
+            echo "is_main=false" >> $GITHUB_OUTPUT
           fi
           
       - name: Build Next.js app
@@ -86,89 +88,109 @@ jobs:
           export BRANCH_NAME="${{ steps.branch.outputs.name }}"
           npm run build
           
-      - name: Checkout gh-pages branch
+      # For main branch: use GitHub Pages Actions (official method)
+      - name: Setup Pages (Main Branch)
+        if: steps.branch.outputs.is_main == 'true'
+        uses: actions/configure-pages@v4
+        
+      - name: Create combined deployment (Main Branch)
+        if: steps.branch.outputs.is_main == 'true'
+        run: |
+          mkdir -p pages-deployment
+          
+          # Check if gh-pages branch exists to get existing branch deployments
+          git fetch origin gh-pages:gh-pages 2>/dev/null || echo "No gh-pages branch found"
+          
+          if git show-branch gh-pages 2>/dev/null; then
+            # Copy existing branch deployments from gh-pages
+            git checkout gh-pages
+            for dir in */; do
+              if [ -d "$dir" ] && [ "$dir" != "_next/" ] && [ "$dir" != ".git/" ]; then
+                echo "Preserving existing branch deployment: $dir"
+                cp -r "$dir" pages-deployment/
+              fi
+            done
+            git checkout ${{ github.ref_name }}
+          fi
+          
+          # Add main branch deployment to root
+          cp -r src/out/* pages-deployment/
+          
+          # Update deployment tracking
+          current_time=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          echo "{\"main_deployed_at\": \"$current_time\", \"commit\": \"${{ github.sha }}\"}" > pages-deployment/.main-deployment.json
+          
+      - name: Upload Pages artifact (Main Branch)
+        if: steps.branch.outputs.is_main == 'true'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: pages-deployment
+          
+      - name: Deploy to GitHub Pages (Main Branch)
+        if: steps.branch.outputs.is_main == 'true'
+        id: deployment
+        uses: actions/deploy-pages@v4
+        
+      # For feature branches: use gh-pages branch method
+      - name: Checkout gh-pages branch (Feature Branch)
+        if: steps.branch.outputs.is_main == 'false'
         uses: actions/checkout@v4
         with:
           ref: gh-pages
-          path: gh-pages
+          path: gh-pages-branch
           token: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true
         
-      - name: Initialize gh-pages if needed
+      - name: Initialize gh-pages if needed (Feature Branch)
+        if: steps.branch.outputs.is_main == 'false'
         run: |
-          if [ ! -d "gh-pages" ]; then
-            mkdir gh-pages
-            cd gh-pages
+          if [ ! -d "gh-pages-branch" ]; then
+            mkdir gh-pages-branch
+            cd gh-pages-branch
             git init
-            git remote add origin https://github.com/${{ github.repository }}.git
+            git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
             git checkout -b gh-pages
-            echo '{"deployments":[]}' > .deployments.json
+            echo '{"branch_deployments":[]}' > .branch-deployments.json
             touch .nojekyll
             git config user.name "GitHub Actions"
             git config user.email "actions@github.com"
-            git add .
-            git commit -m "Initialize gh-pages branch"
+          else
+            cd gh-pages-branch
+            git config user.name "GitHub Actions"
+            git config user.email "actions@github.com"
           fi
           
-      - name: Deploy to branch directory
+      - name: Update branch deployment (Feature Branch)
+        if: steps.branch.outputs.is_main == 'false'
         run: |
-          cd gh-pages
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
+          cd gh-pages-branch
           
           # Remove existing deployment for this branch
-          if [ -n "${{ steps.branch.outputs.name }}" ] && [ -d "${{ steps.branch.outputs.name }}" ]; then
+          if [ -d "${{ steps.branch.outputs.name }}" ]; then
             rm -rf "${{ steps.branch.outputs.name }}"
-          elif [ -z "${{ steps.branch.outputs.name }}" ]; then
-            # Main branch - remove root files but keep directories
-            find . -maxdepth 1 -type f ! -name '.deployments.json' ! -name '.nojekyll' ! -name '.git*' -delete
-            find . -maxdepth 1 -name '_next' -type d -exec rm -rf {} + 2>/dev/null || true
           fi
           
-          # Copy new build
-          if [ -n "${{ steps.branch.outputs.name }}" ]; then
-            mkdir -p "${{ steps.branch.outputs.name }}"
-            cp -r ../src/out/* "${{ steps.branch.outputs.name }}/"
-          else
-            cp -r ../src/out/* ./
-          fi
+          # Add new deployment
+          mkdir -p "${{ steps.branch.outputs.name }}"
+          cp -r ../src/out/* "${{ steps.branch.outputs.name }}/"
           
-          # Update deployments tracking
+          # Update tracking
           current_time=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-          if [ -f .deployments.json ]; then
-            # Remove existing entry for this branch and add new one
-            branch_filter='.'
-            if [ -n "${{ steps.branch.outputs.name }}" ]; then
-              branch_filter=".deployments |= map(select(.branch != \"${{ steps.branch.outputs.name }}\"))"
-            else
-              branch_filter=".deployments |= map(select(.branch != \"main\" and .branch != \"master\"))"
-            fi
-            
+          if [ -f .branch-deployments.json ]; then
             temp_file=$(mktemp)
-            echo "{\"deployments\":[]}" | jq "$branch_filter" > temp_deployments.json
-            
-            branch_name="${{ steps.branch.outputs.name }}"
-            if [ -z "$branch_name" ]; then
-              branch_name="main"
-            fi
-            
-            jq ".deployments += [{\"branch\": \"$branch_name\", \"path\": \"${{ steps.branch.outputs.path }}\", \"deployed_at\": \"$current_time\", \"commit\": \"${{ github.sha }}\"}]" temp_deployments.json > .deployments.json
-            rm temp_deployments.json
+            jq ".branch_deployments |= map(select(.branch != \"${{ steps.branch.outputs.name }}\"))" .branch-deployments.json > "$temp_file"
+            jq ".branch_deployments += [{\"branch\": \"${{ steps.branch.outputs.name }}\", \"path\": \"${{ steps.branch.outputs.path }}\", \"deployed_at\": \"$current_time\", \"commit\": \"${{ github.sha }}\"}]" "$temp_file" > .branch-deployments.json
+            rm "$temp_file"
           else
-            branch_name="${{ steps.branch.outputs.name }}"
-            if [ -z "$branch_name" ]; then
-              branch_name="main"
-            fi
-            echo "{\"deployments\":[{\"branch\": \"$branch_name\", \"path\": \"${{ steps.branch.outputs.path }}\", \"deployed_at\": \"$current_time\", \"commit\": \"${{ github.sha }}\"}]}" > .deployments.json
+            echo "{\"branch_deployments\":[{\"branch\": \"${{ steps.branch.outputs.name }}\", \"path\": \"${{ steps.branch.outputs.path }}\", \"deployed_at\": \"$current_time\", \"commit\": \"${{ github.sha }}\"}]}" > .branch-deployments.json
           fi
           
-          # Commit and push
+          # Commit and push to gh-pages
           git add .
-          if git diff --staged --quiet; then
-            echo "No changes to deploy"
-          else
-            git commit -m "Deploy ${{ steps.branch.outputs.name || 'main' }} branch - ${{ github.sha }}"
+          if ! git diff --staged --quiet; then
+            git commit -m "Deploy branch: ${{ steps.branch.outputs.name }} - ${{ github.sha }}"
             git push origin gh-pages
+            echo "Branch deployment updated in gh-pages"
           fi
           
       - name: Comment on PR with deployment URL
