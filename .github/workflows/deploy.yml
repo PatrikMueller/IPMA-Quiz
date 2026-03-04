@@ -79,93 +79,13 @@ jobs:
       - name: Build Next.js app
         run: |
           cd src
-          export NEXT_PUBLIC_BASE_PATH="/${{ steps.branch.outputs.path }}"
-          npm run build
-          
-      - name: Create HTML redirect artifact
-        run: |
-          # Create redirect HTML file
-          mkdir -p redirect-artifact
-          branch_name="${{ steps.branch.outputs.name }}"
-          if [ -z "$branch_name" ]; then
-            branch_name="main"
-            deploy_url="https://patrikmueller.github.io/IPMA-Quiz/"
+          if [ -n "${{ steps.branch.outputs.name }}" ]; then
+            export NEXT_PUBLIC_BASE_PATH="/IPMA-Quiz/${{ steps.branch.outputs.name }}"
           else
-            deploy_url="https://patrikmueller.github.io/IPMA-Quiz/$branch_name/"
+            export NEXT_PUBLIC_BASE_PATH="/IPMA-Quiz"
           fi
-          
-          cat > redirect-artifact/redirect.html <<EOF
-          <!DOCTYPE html>
-          <html lang="en">
-          <head>
-              <meta charset="UTF-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <title>IPMA Quiz - Redirecting to ${branch_name}</title>
-              <meta http-equiv="refresh" content="3;url=${deploy_url}">
-              <style>
-                  body {
-                      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-                      display: flex; align-items: center; justify-content: center;
-                      min-height: 100vh; margin: 0; background: #f8fafc;
-                      flex-direction: column; text-align: center; color: #334155;
-                  }
-                  .container {
-                      background: white; padding: 3rem; border-radius: 12px;
-                      box-shadow: 0 4px 20px rgba(0,0,0,0.1); max-width: 500px;
-                  }
-                  h1 { color: #1e293b; margin-bottom: 1rem; font-size: 2rem; }
-                  .branch { background: #dbeafe; color: #1e3a8a; padding: 0.5rem 1rem; border-radius: 6px; font-weight: 600; }
-                  .countdown { font-size: 1.5rem; font-weight: bold; color: #3b82f6; }
-                  .links { margin-top: 2rem; }
-                  a { 
-                      display: inline-block; margin: 0.5rem; padding: 0.75rem 1.5rem;
-                      background: #3b82f6; color: white; text-decoration: none;
-                      border-radius: 8px; transition: background 0.2s;
-                  }
-                  a:hover { background: #2563eb; }
-                  .overview { background: #10b981; }
-                  .overview:hover { background: #059669; }
-              </style>
-              <script>
-                  let countdown = 3;
-                  function updateCountdown() {
-                      document.getElementById('countdown').textContent = countdown;
-                      if (countdown <= 0) {
-                          window.location.href = '${deploy_url}';
-                      } else {
-                          countdown--;
-                          setTimeout(updateCountdown, 1000);
-                      }
-                  }
-                  window.onload = updateCountdown;
-              </script>
-          </head>
-          <body>
-              <div class="container">
-                  <h1>🚀 IPMA Quiz Deployment</h1>
-                  <p>Branch: <span class="branch">${branch_name}</span></p>
-                  <p>Redirecting in <span id="countdown" class="countdown">3</span> seconds...</p>
-                  
-                  <div class="links">
-                      <a href="${deploy_url}">→ Go to Deployment</a>
-                      <a href="https://patrikmueller.github.io/IPMA-Quiz/deployments.html" class="overview">📋 All Deployments</a>
-                  </div>
-                  
-                  <p style="margin-top: 2rem; font-size: 0.875rem; color: #64748b;">
-                      <strong>Note:</strong> This is the correct URL for branch <strong>${branch_name}</strong>.
-                      The github-pages[bot] URL is incorrect for feature branches.
-                  </p>
-              </div>
-          </body>
-          </html>
-          EOF
-          
-      - name: Upload redirect artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: deployment-redirect-${{ steps.branch.outputs.name || 'main' }}
-          path: redirect-artifact/
-          retention-days: 30
+          export NODE_ENV="production"
+          npm run build
           
       - name: Deploy to gh-pages
         run: |
@@ -363,6 +283,99 @@ jobs:
             git push origin gh-pages
           fi
           
+      - name: Create HTML redirect artifact
+        run: |
+          mkdir -p redirect-artifact
+          
+          branch_name="${{ steps.branch.outputs.name }}"
+          branch_display="${{ steps.branch.outputs.name }}"
+          if [ -z "$branch_name" ]; then
+            branch_name="main"
+            branch_display="main"
+          fi
+          
+          deploy_url="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/${{ steps.branch.outputs.path }}"
+          overview_url="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/deployments.html"
+          
+          cat > redirect-artifact/deployment-redirect.html <<EOF
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>IPMA Quiz - ${branch_display} Deployment</title>
+              <meta http-equiv="refresh" content="5;url=${deploy_url}">
+              <style>
+                  * { margin: 0; padding: 0; box-sizing: border-box; }
+                  body {
+                      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+                      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                      color: white; display: flex; align-items: center; justify-center: center;
+                      min-height: 100vh; text-align: center; padding: 2rem;
+                  }
+                  .container { max-width: 500px; }
+                  h1 { font-size: 2.5rem; margin-bottom: 1rem; }
+                  .branch { font-size: 1.2rem; background: rgba(255,255,255,0.2); 
+                           padding: 0.5rem 1rem; border-radius: 8px; margin: 1rem 0; }
+                  .countdown { font-size: 4rem; font-weight: bold; margin: 2rem 0; }
+                  .links { margin-top: 2rem; }
+                  .link { display: inline-block; margin: 0.5rem; padding: 1rem 2rem;
+                          background: rgba(255,255,255,0.2); color: white; text-decoration: none;
+                          border-radius: 8px; transition: background 0.3s; }
+                  .link:hover { background: rgba(255,255,255,0.3); }
+                  .primary { background: rgba(255,255,255,0.3); font-weight: bold; }
+                  .info { margin-top: 2rem; font-size: 0.9rem; opacity: 0.8; }
+              </style>
+          </head>
+          <body>
+              <div class="container">
+                  <h1>🚀 Deployment Ready!</h1>
+                  <div class="branch">Branch: <strong>${branch_display}</strong></div>
+                  <div class="countdown" id="countdown">5</div>
+                  <p>Redirecting to your deployment...</p>
+                  
+                  <div class="links">
+                      <a href="${deploy_url}" class="link primary">→ Go to Deployment</a>
+                      <a href="${overview_url}" class="link">📋 All Deployments</a>
+                  </div>
+                  
+                  <div class="info">
+                      <p><strong>Commit:</strong> ${{ github.sha }}</p>
+                      <p><strong>Correct URL:</strong><br><code>${deploy_url}</code></p>
+                  </div>
+              </div>
+              
+              <script>
+                  let timeLeft = 5;
+                  const countdownEl = document.getElementById('countdown');
+                  
+                  const timer = setInterval(() => {
+                      timeLeft--;
+                      countdownEl.textContent = timeLeft;
+                      
+                      if (timeLeft <= 0) {
+                          clearInterval(timer);
+                          window.location.href = '${deploy_url}';
+                      }
+                  }, 1000);
+                  
+                  // Allow immediate redirect on click
+                  document.addEventListener('click', () => {
+                      clearInterval(timer);
+                      window.location.href = '${deploy_url}';
+                  });
+              </script>
+          </body>
+          </html>
+          EOF
+          
+      - name: Upload HTML redirect artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-redirect-${{ steps.branch.outputs.name || 'main' }}
+          path: redirect-artifact/
+          retention-days: 30
+          
       - name: Comment on PR
         if: github.event_name == 'pull_request'
         uses: actions/github-script@v7
@@ -384,14 +397,18 @@ jobs:
             📍 **Branch**: \`${branch}\`
             🔗 **Branch URL**: ${deployUrl}
             📋 **All Deployments**: ${overviewUrl}
-             **Commit**: \`${{ github.sha }}\`
+            📦 **HTML Redirect**: Download the \`deployment-redirect-${branch}\` artifact for a redirect page
+            📝 **Commit**: \`${{ github.sha }}\`
             
             ✅ **Branch-specific features:**
-            - Independent deployment in subdirectory
+            - Independent deployment in subdirectory  
             - Automatic cleanup when branch is deleted
             - Updated with each new commit to this branch
+            - HTML redirect artifact with correct URL
             
-            💡 **Tip**: Use the branch URL above, not the one from github-pages[bot]!`;
+            💡 **Tips:** 
+            - Use the branch URL above, not the one from github-pages[bot]!
+            - Download the artifact for an HTML redirect page with countdown`;
             } else {
               // Main branch comment
               comment = `🚀 **Production Deployment Ready!**
@@ -399,6 +416,7 @@ jobs:
             📍 **Branch**: \`main\` (Production)
             🔗 **Production URL**: ${deployUrl}
             📋 **All Deployments**: ${overviewUrl}
+            📦 **HTML Redirect**: Download the \`deployment-redirect-main\` artifact
             📝 **Commit**: \`${{ github.sha }}\`
             
             ✅ **Production deployment complete!**`;

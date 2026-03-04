@@ -9,14 +9,13 @@ const nextConfig: NextConfig = {
     unoptimized: true,
   },
   
-  // Configure base path for branch deployments (clean version)
-  basePath: process.env.NEXT_PUBLIC_BASE_PATH?.replace(/\/$/, '') || '',
+  // Configure base path for branch deployments
+  basePath: process.env.NEXT_PUBLIC_BASE_PATH || '',
   
-  // Use relative asset paths - no assetPrefix needed!
-  // Assets will automatically load relative to the current URL
-  // This works for both main branch and feature branches automatically
+  // Configure asset prefix for GitHub Pages - this fixes SVG/image loading!
+  assetPrefix: process.env.NEXT_PUBLIC_BASE_PATH || '',
   
-  // Ensure trailing slashes for GitHub Pages
+  // Ensure trailing slashes are handled correctly
   trailingSlash: true,
 };
 
