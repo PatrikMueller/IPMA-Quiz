@@ -1,1 +1,16 @@
-{"deployments":[{"branch": "iq-11-create-ci-cd-build-and-deployment-pipelines", "path": "iq-11-create-ci-cd-build-and-deployment-pipelines/", "deployed_at": "2026-03-04T16:42:43Z", "commit": "1037e10223ebdd646e8804afa151bb1e9e2e1209"}]}
+{
+  "deployments": [
+    {
+      "branch": "iq-11-create-ci-cd-build-and-deployment-pipelines",
+      "path": "iq-11-create-ci-cd-build-and-deployment-pipelines/",
+      "deployed_at": "2026-03-04T16:42:43Z",
+      "commit": "1037e10223ebdd646e8804afa151bb1e9e2e1209"
+    },
+    {
+      "branch": "main",
+      "path": "",
+      "deployed_at": "2026-03-04T17:05:58Z",
+      "commit": "b24c68e319fab6475e86b23a5765e2d7ce3014c3"
+    }
+  ]
+}
