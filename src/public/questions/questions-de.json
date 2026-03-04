@@ -1,0 +1,212 @@
+{
+  "language": "de",
+  "categories": ["Projektplanung", "Führung", "Kommunikation", "Risikomanagement", "Ressourcenmanagement"],
+  "title": "IPMA Level D Übungsset #1",
+  "questions": [
+    {
+      "id": "pm-role-001",
+      "categories": ["Führung", "Projektplanung"],
+      "question": {
+        "type": "rich-text",
+        "content": [
+          { "type": "text", "value": "Was ist die Hauptaufgabe eines Projektleiters in der Initialisierungsphase?" }
+        ]
+      },
+      "options": [
+        {
+          "type": "text",
+          "content": [
+            { "type": "text", "value": "Projektumfang und -ziele definieren" }
+          ]
+        },
+        {
+          "type": "text",
+          "content": [
+            { "type": "text", "value": "Projektergebnisse umsetzen" }
+          ]
+        },
+        {
+          "type": "text",
+          "content": [
+            { "type": "text", "value": "Projektleistung überwachen und steuern" }
+          ]
+        },
+        {
+          "type": "text",
+          "content": [
+            { "type": "text", "value": "Projekt abschließen und Erfahrungen dokumentieren" }
+          ]
+        }
+      ],
+      "multiple": false,
+      "correctAnswers": [0],
+      "explanation": [
+        { "type": "text", "value": "Während der Initialisierungsphase liegt die Hauptaufgabe des Projektleiters in der Definition des Projektumfangs, der Ziele und der Stakeholder-Anforderungen. Dies schafft die Grundlage für alle nachfolgenden Projektaktivitäten." }
+      ]
+    },
+    {
+      "id": "communication-002",
+      "categories": ["Kommunikation", "Führung"],
+      "question": {
+        "type": "rich-text",
+        "content": [
+          { "type": "text", "value": "Welche der folgenden Punkte sind Schlüsselelemente einer effektiven Projektkommunikation? (Alle zutreffenden auswählen)" }
+        ]
+      },
+      "options": [
+        {
+          "type": "text",
+          "content": [
+            { "type": "text", "value": "Klare und präzise Nachrichten" }
+          ]
+        },
+        {
+          "type": "text",
+          "content": [
+            { "type": "text", "value": "Regelmäßige Stakeholder-Updates" }
+          ]
+        },
+        {
+          "type": "text",
+          "content": [
+            { "type": "text", "value": "Nur einseitige Kommunikation" }
+          ]
+        },
+        {
+          "type": "text",
+          "content": [
+            { "type": "text", "value": "Angemessene Kommunikationskanäle" }
+          ]
+        }
+      ],
+      "multiple": true,
+      "correctAnswers": [0, 1, 3],
+      "explanation": [
+        { "type": "text", "value": "Effektive Projektkommunikation erfordert klare Nachrichten, regelmäßige Updates an Stakeholder und die Nutzung angemessener Kanäle. Zweiseitige Kommunikation ist wesentlich, nicht einseitige Kommunikation." }
+      ]
+    },
+    {
+      "id": "risk-management-003",
+      "categories": ["Risikomanagement", "Projektplanung"],
+      "question": {
+        "type": "rich-text",
+        "content": [
+          { "type": "text", "value": "Was ist der erste Schritt im Risikomanagement-Prozess?" }
+        ]
+      },
+      "options": [
+        {
+          "type": "text",
+          "content": [
+            { "type": "text", "value": "Risikoanalyse" }
+          ]
+        },
+        {
+          "type": "text",
+          "content": [
+            { "type": "text", "value": "Risikoidentifikation" }
+          ]
+        },
+        {
+          "type": "text",
+          "content": [
+            { "type": "text", "value": "Risikobehandlungsplanung" }
+          ]
+        },
+        {
+          "type": "text",
+          "content": [
+            { "type": "text", "value": "Risikoüberwachung" }
+          ]
+        }
+      ],
+      "multiple": false,
+      "correctAnswers": [1],
+      "explanation": [
+        { "type": "text", "value": "Die Risikoidentifikation ist der erste Schritt im Risikomanagement. Man kann Risiken nicht analysieren, Behandlungspläne erstellen oder überwachen, bevor man sie zunächst identifiziert hat." }
+      ]
+    },
+    {
+      "id": "resource-management-004",
+      "categories": ["Ressourcenmanagement", "Projektplanung"],
+      "question": {
+        "type": "rich-text",
+        "content": [
+          { "type": "text", "value": "Welche Faktoren sollten bei der Ressourcenzuteilung für Projektaktivitäten berücksichtigt werden?" }
+        ]
+      },
+      "options": [
+        {
+          "type": "text",
+          "content": [
+            { "type": "text", "value": "Erforderliche Fähigkeiten und Kompetenzen" }
+          ]
+        },
+        {
+          "type": "text",
+          "content": [
+            { "type": "text", "value": "Ressourcenverfügbarkeit und -beschränkungen" }
+          ]
+        },
+        {
+          "type": "text",
+          "content": [
+            { "type": "text", "value": "Projektprioritäten und -abhängigkeiten" }
+          ]
+        },
+        {
+          "type": "text",
+          "content": [
+            { "type": "text", "value": "Alle oben genannten" }
+          ]
+        }
+      ],
+      "multiple": false,
+      "correctAnswers": [3],
+      "explanation": [
+        { "type": "text", "value": "Eine effektive Ressourcenzuteilung erfordert die Berücksichtigung benötigter Fähigkeiten, Ressourcenverfügbarkeit und Projektprioritäten. Alle diese Faktoren arbeiten zusammen, um eine optimale Ressourcennutzung zu gewährleisten." }
+      ]
+    },
+    {
+      "id": "project-lifecycle-005",
+      "categories": ["Projektplanung"],
+      "question": {
+        "type": "rich-text",
+        "content": [
+          { "type": "text", "value": "Was sind die Hauptphasen eines typischen Projektlebenszyklus? (Alle zutreffenden auswählen)" }
+        ]
+      },
+      "options": [
+        {
+          "type": "text",
+          "content": [
+            { "type": "text", "value": "Initialisierung" }
+          ]
+        },
+        {
+          "type": "text",
+          "content": [
+            { "type": "text", "value": "Planung" }
+          ]
+        },
+        {
+          "type": "text",
+          "content": [
+            { "type": "text", "value": "Durchführung" }
+          ]
+        },
+        {
+          "type": "text",
+          "content": [
+            { "type": "text", "value": "Abschluss" }
+          ]
+        }
+      ],
+      "multiple": true,
+      "correctAnswers": [0, 1, 2, 3],
+      "explanation": [
+        { "type": "text", "value": "Der typische Projektlebenszyklus umfasst die Phasen Initialisierung, Planung, Durchführung und Abschluss. Einige Methodologien beinhalten auch Überwachung & Steuerung als separate Phase." }
+      ]
+    }
+  ]
+}
