@@ -1,16 +1,16 @@
 {
   "deployments": [
     {
-      "branch": "refs-pull-3-merge",
-      "path": "refs-pull-3-merge/",
-      "deployed_at": "2026-03-04T15:59:31Z",
-      "commit": "e23e37576edb13da69204aff6913b9ec699c800e"
-    },
-    {
       "branch": "iq-11-create-ci-cd-build-and-deployment-pipelines",
       "path": "iq-11-create-ci-cd-build-and-deployment-pipelines/",
       "deployed_at": "2026-03-04T16:13:48Z",
       "commit": "50e59ebdb0812e0da23af74bdf1076a4676bfd1d"
+    },
+    {
+      "branch": "refs-pull-3-merge",
+      "path": "refs-pull-3-merge/",
+      "deployed_at": "2026-03-04T16:13:54Z",
+      "commit": "9a27aa621201dd6b428501711d0c8f3a7aa83630"
     }
   ]
 }
