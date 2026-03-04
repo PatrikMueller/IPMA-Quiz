@@ -1,0 +1,466 @@
+name: CI/CD - Lint, Build & Deploy to GitHub Pages
+
+on:
+  push:
+    branches: ['**']  # Trigger on all branches
+  pull_request:
+    branches: [main, master]
+  delete:  # Trigger when branches are deleted
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  lint:
+    name: 'Lint Code'
+    runs-on: ubuntu-latest
+    if: github.event_name != 'delete'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'src/package-lock.json'
+          
+      - name: Install dependencies
+        run: |
+          cd src
+          npm ci
+          
+      - name: Run ESLint
+        run: |
+          cd src
+          npm run lint
+        continue-on-error: true
+
+  build-and-deploy:
+    name: 'Build & Deploy'
+    runs-on: ubuntu-latest
+    needs: lint
+    if: github.event_name == 'push'
+    
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'src/package-lock.json'
+          
+      - name: Install dependencies
+        run: |
+          cd src
+          npm ci
+          
+      - name: Get branch name
+        id: branch
+        run: |
+          if [ "${{ github.ref }}" = "refs/heads/main" ] || [ "${{ github.ref }}" = "refs/heads/master" ]; then
+            echo "name=" >> $GITHUB_OUTPUT
+            echo "path=" >> $GITHUB_OUTPUT
+          else
+            branch_name=$(echo ${GITHUB_REF#refs/heads/} | sed 's/[^a-zA-Z0-9]/-/g' | tr '[:upper:]' '[:lower:]')
+            echo "name=$branch_name" >> $GITHUB_OUTPUT
+            echo "path=$branch_name/" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: Build Next.js app
+        run: |
+          cd src
+          if [ -n "${{ steps.branch.outputs.name }}" ]; then
+            export NEXT_PUBLIC_BASE_PATH="/IPMA-Quiz/${{ steps.branch.outputs.name }}"
+          else
+            export NEXT_PUBLIC_BASE_PATH="/IPMA-Quiz"
+          fi
+          export NODE_ENV="production"
+          npm run build
+          
+      - name: Deploy to gh-pages
+        run: |
+          # Clone or create gh-pages branch
+          if git ls-remote --heads origin gh-pages | grep gh-pages; then
+            git clone --single-branch --branch gh-pages https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git gh-pages-repo
+          else
+            mkdir gh-pages-repo
+            cd gh-pages-repo
+            git init
+            git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+            git checkout -b gh-pages
+            touch .nojekyll
+            echo '{"deployments":[]}' > .deployments.json
+            git config user.name "GitHub Actions"
+            git config user.email "actions@github.com"
+            git add .
+            git commit -m "Initialize gh-pages"
+            git push -u origin gh-pages
+            cd ..
+            git clone --single-branch --branch gh-pages https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git gh-pages-repo
+          fi
+          
+          cd gh-pages-repo
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          
+          # Remove old deployment for this branch
+          if [ -n "${{ steps.branch.outputs.name }}" ]; then
+            rm -rf "${{ steps.branch.outputs.name }}"
+          else
+            # Main branch - remove root files but preserve branch directories and deployments page
+            find . -maxdepth 1 -type f ! -name '.git*' ! -name '.deployments.json' ! -name '.nojekyll' ! -name 'deployments.html' -delete
+            find . -maxdepth 1 -name '_next' -type d -exec rm -rf {} + 2>/dev/null || true
+          fi
+          
+          # Deploy new build
+          if [ -n "${{ steps.branch.outputs.name }}" ]; then
+            mkdir -p "${{ steps.branch.outputs.name }}"
+            cp -r ../src/out/* "${{ steps.branch.outputs.name }}/"
+          else
+            cp -r ../src/out/* ./
+          fi
+          
+          # Update tracking file
+          current_time=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          branch_name="${{ steps.branch.outputs.name }}"
+          if [ -z "$branch_name" ]; then
+            branch_name="main"
+          fi
+          
+          if [ -f .deployments.json ]; then
+            temp_file=$(mktemp)
+            jq --arg branch "$branch_name" --arg path "${{ steps.branch.outputs.path }}" --arg time "$current_time" --arg commit "${{ github.sha }}" '
+              .deployments |= map(select(.branch != $branch)) + [{"branch": $branch, "path": $path, "deployed_at": $time, "commit": $commit}]' \
+              .deployments.json > "$temp_file" && mv "$temp_file" .deployments.json
+          else
+            echo "{\"deployments\":[{\"branch\": \"$branch_name\", \"path\": \"${{ steps.branch.outputs.path }}\", \"deployed_at\": \"$current_time\", \"commit\": \"${{ github.sha }}\"}]}" > .deployments.json
+          fi
+          
+          # Create HTML overview page (separate from main branch index.html)
+          cat > deployments.html <<'EOF'
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>IPMA Quiz - Branch Deployments</title>
+              <style>
+                  * { margin: 0; padding: 0; box-sizing: border-box; }
+                  body {
+                      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+                      line-height: 1.6; background: #f8fafc; color: #334155; min-height: 100vh;
+                  }
+                  .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+                  header { text-align: center; margin-bottom: 3rem; }
+                  h1 { font-size: 2.5rem; color: #1e293b; margin-bottom: 0.5rem; }
+                  .subtitle { color: #64748b; font-size: 1.1rem; }
+                  .deployments { display: grid; gap: 1.5rem; }
+                  .deployment {
+                      background: white; border-radius: 12px; padding: 1.5rem;
+                      box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;
+                      transition: transform 0.2s, box-shadow 0.2s;
+                  }
+                  .deployment:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+                  .deployment.main { border-left: 4px solid #10b981; }
+                  .deployment.branch { border-left: 4px solid #3b82f6; }
+                  .deployment h2 { font-size: 1.5rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+                  .badge { font-size: 0.75rem; padding: 0.25rem 0.5rem; border-radius: 6px; font-weight: 600; text-transform: uppercase; }
+                  .badge.main { background: #d1fae5; color: #065f46; }
+                  .badge.branch { background: #dbeafe; color: #1e3a8a; }
+                  .deployment-link { 
+                      display: inline-block; margin: 1rem 0; padding: 0.75rem 1.5rem;
+                      background: #3b82f6; color: white; text-decoration: none;
+                      border-radius: 8px; font-weight: 500; transition: background 0.2s;
+                  }
+                  .deployment-link:hover { background: #2563eb; }
+                  .meta { font-size: 0.875rem; color: #64748b; margin-top: 1rem; }
+                  .meta div { margin-bottom: 0.25rem; }
+                  .loading { text-align: center; padding: 2rem; color: #64748b; }
+                  .error { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; padding: 1rem; border-radius: 8px; text-align: center; }
+              </style>
+          </head>
+          <body>
+              <div class="container">
+                  <header>
+                      <h1>🎓 IPMA Quiz</h1>
+                      <p class="subtitle">Branch Deployments Overview</p>
+                  </header>
+                  
+                  <div id="deployments" class="deployments">
+                      <div class="loading">Loading deployments...</div>
+                  </div>
+              </div>
+
+              <script>
+                  async function loadDeployments() {
+                      try {
+                          const response = await fetch('./.deployments.json');
+                          const data = await response.json();
+                          const container = document.getElementById('deployments');
+                          
+                          if (!data.deployments || data.deployments.length === 0) {
+                              container.innerHTML = '<div class="error">No deployments found.</div>';
+                              return;
+                          }
+                          
+                          // Sort deployments: main first, then alphabetically
+                          const sorted = data.deployments.sort((a, b) => {
+                              if (a.branch === 'main') return -1;
+                              if (b.branch === 'main') return 1;
+                              return a.branch.localeCompare(b.branch);
+                          });
+                          
+                          container.innerHTML = sorted.map(deployment => {
+                              const isMain = deployment.branch === 'main';
+                              const deployedDate = new Date(deployment.deployed_at);
+                              const formattedDate = deployedDate.toLocaleString();
+                              const relativeTime = getRelativeTime(deployedDate);
+                              
+                              return `
+                                  <div class="deployment ${isMain ? 'main' : 'branch'}">
+                                      <h2>
+                                          ${isMain ? '🚀 Production' : `📋 ${deployment.branch}`}
+                                          <span class="badge ${isMain ? 'main' : 'branch'}">
+                                              ${isMain ? 'Production' : 'Branch'}
+                                          </span>
+                                      </h2>
+                                      <a href="./${deployment.path}" class="deployment-link">
+                                          → View ${isMain ? 'Production' : 'Branch'} Deployment
+                                      </a>
+                                      <div class="meta">
+                                          <div><strong>Last updated:</strong> ${formattedDate} (${relativeTime})</div>
+                                          <div><strong>Commit:</strong> <code>${deployment.commit.substring(0, 8)}</code></div>
+                                          ${isMain ? '<div><strong>Status:</strong> Live Production</div>' : `<div><strong>Status:</strong> Preview Branch</div>`}
+                                      </div>
+                                  </div>
+                              `;
+                          }).join('');
+                          
+                      } catch (error) {
+                          document.getElementById('deployments').innerHTML = 
+                              '<div class="error">Failed to load deployment information.</div>';
+                          console.error('Error loading deployments:', error);
+                      }
+                  }
+                  
+                  function getRelativeTime(date) {
+                      const now = new Date();
+                      const diff = now - date;
+                      const minutes = Math.floor(diff / (1000 * 60));
+                      const hours = Math.floor(diff / (1000 * 60 * 60));
+                      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                      
+                      if (minutes < 1) return 'just now';
+                      if (minutes < 60) return `${minutes} minute${minutes !== 1 ? 's' : ''} ago`;
+                      if (hours < 24) return `${hours} hour${hours !== 1 ? 's' : ''} ago`;
+                      return `${days} day${days !== 1 ? 's' : ''} ago`;
+                  }
+                  
+                  // Load deployments when page loads
+                  loadDeployments();
+                  
+                  // Auto-refresh every 30 seconds
+                  setInterval(loadDeployments, 30000);
+              </script>
+          </body>
+          </html>
+          EOF
+          
+          # Commit and push
+          git add .
+          if ! git diff --cached --quiet; then
+            git commit -m "Deploy $branch_name - ${{ github.sha }}"
+            git push origin gh-pages
+          fi
+          
+      - name: Create HTML redirect artifact
+        run: |
+          mkdir -p redirect-artifact
+          
+          branch_name="${{ steps.branch.outputs.name }}"
+          branch_display="${{ steps.branch.outputs.name }}"
+          if [ -z "$branch_name" ]; then
+            branch_name="main"
+            branch_display="main"
+          fi
+          
+          deploy_url="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/${{ steps.branch.outputs.path }}"
+          overview_url="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/deployments.html"
+          
+          cat > redirect-artifact/deployment-redirect.html <<EOF
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>IPMA Quiz - ${branch_display} Deployment</title>
+              <meta http-equiv="refresh" content="5;url=${deploy_url}">
+              <style>
+                  * { margin: 0; padding: 0; box-sizing: border-box; }
+                  body {
+                      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+                      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                      color: white; display: flex; align-items: center; justify-center: center;
+                      min-height: 100vh; text-align: center; padding: 2rem;
+                  }
+                  .container { max-width: 500px; }
+                  h1 { font-size: 2.5rem; margin-bottom: 1rem; }
+                  .branch { font-size: 1.2rem; background: rgba(255,255,255,0.2); 
+                           padding: 0.5rem 1rem; border-radius: 8px; margin: 1rem 0; }
+                  .countdown { font-size: 4rem; font-weight: bold; margin: 2rem 0; }
+                  .links { margin-top: 2rem; }
+                  .link { display: inline-block; margin: 0.5rem; padding: 1rem 2rem;
+                          background: rgba(255,255,255,0.2); color: white; text-decoration: none;
+                          border-radius: 8px; transition: background 0.3s; }
+                  .link:hover { background: rgba(255,255,255,0.3); }
+                  .primary { background: rgba(255,255,255,0.3); font-weight: bold; }
+                  .info { margin-top: 2rem; font-size: 0.9rem; opacity: 0.8; }
+              </style>
+          </head>
+          <body>
+              <div class="container">
+                  <h1>🚀 Deployment Ready!</h1>
+                  <div class="branch">Branch: <strong>${branch_display}</strong></div>
+                  <div class="countdown" id="countdown">5</div>
+                  <p>Redirecting to your deployment...</p>
+                  
+                  <div class="links">
+                      <a href="${deploy_url}" class="link primary">→ Go to Deployment</a>
+                      <a href="${overview_url}" class="link">📋 All Deployments</a>
+                  </div>
+                  
+                  <div class="info">
+                      <p><strong>Commit:</strong> ${{ github.sha }}</p>
+                      <p><strong>Correct URL:</strong><br><code>${deploy_url}</code></p>
+                  </div>
+              </div>
+              
+              <script>
+                  let timeLeft = 5;
+                  const countdownEl = document.getElementById('countdown');
+                  
+                  const timer = setInterval(() => {
+                      timeLeft--;
+                      countdownEl.textContent = timeLeft;
+                      
+                      if (timeLeft <= 0) {
+                          clearInterval(timer);
+                          window.location.href = '${deploy_url}';
+                      }
+                  }, 1000);
+                  
+                  // Allow immediate redirect on click
+                  document.addEventListener('click', () => {
+                      clearInterval(timer);
+                      window.location.href = '${deploy_url}';
+                  });
+              </script>
+          </body>
+          </html>
+          EOF
+          
+      - name: Upload HTML redirect artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-redirect-${{ steps.branch.outputs.name || 'main' }}
+          path: redirect-artifact/
+          retention-days: 30
+
+  pr-comment:
+    name: 'PR Comment'
+    runs-on: ubuntu-latest
+    needs: lint
+    if: github.event_name == 'pull_request'
+    
+    permissions:
+      pull-requests: write
+    
+    steps:
+      - name: Get branch info from PR
+        id: branch
+        run: |
+          branch_name=$(echo "${{ github.event.pull_request.head.ref }}" | sed 's/[^a-zA-Z0-9]/-/g' | tr '[:upper:]' '[:lower:]')
+          echo "name=$branch_name" >> $GITHUB_OUTPUT
+          
+      - name: Comment on PR with branch deployment link
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const branchName = '${{ steps.branch.outputs.name }}';
+            const baseUrl = 'https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}';
+            const deployUrl = `${baseUrl}/${branchName}/`;
+            const overviewUrl = `${baseUrl}/deployments.html`;
+            
+            const comment = `🚀 **Branch Preview Available!**
+            
+            ⚠️ **Important**: The github-pages[bot] comment above shows the wrong URL for branch deployments!
+            
+            📍 **Branch**: \`${{ github.event.pull_request.head.ref }}\`
+            🔗 **Correct Branch URL**: ${deployUrl}
+            📋 **All Deployments**: ${overviewUrl}
+            📝 **Head Commit**: \`${{ github.event.pull_request.head.sha }}\`
+            
+            ✅ **Branch-specific preview:**
+            - Independent deployment in subdirectory  
+            - Updated when you push to this branch
+            - Automatic cleanup when branch is deleted
+            
+            💡 **Important**: This PR does NOT create a new deployment. It links to the existing branch deployment that was created when you pushed to the branch.
+            
+            📦 **HTML Redirect**: Look for the \`deployment-redirect-${branchName}\` artifact in the latest push action on this branch.`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+  cleanup:
+    name: 'Cleanup Deleted Branch'
+    runs-on: ubuntu-latest
+    if: github.event_name == 'delete' && github.event.ref_type == 'branch'
+    
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Remove branch deployment
+        run: |
+          deleted_branch="${{ github.event.ref }}"
+          sanitized_branch=$(echo "$deleted_branch" | sed 's/[^a-zA-Z0-9]/-/g' | tr '[:upper:]' '[:lower:]')
+          
+          if git ls-remote --heads origin gh-pages | grep gh-pages; then
+            git clone --single-branch --branch gh-pages https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git gh-pages-repo
+            cd gh-pages-repo
+            git config user.name "GitHub Actions"
+            git config user.email "actions@github.com"
+            
+            if [ -d "$sanitized_branch" ]; then
+              rm -rf "$sanitized_branch"
+              echo "Removed deployment for branch: $sanitized_branch"
+              
+              # Update tracking
+              if [ -f .deployments.json ]; then
+                temp_file=$(mktemp)
+                jq --arg branch "$deleted_branch" --arg sanitized "$sanitized_branch" '
+                  .deployments |= map(select(.branch != $branch and .branch != $sanitized))' \
+                  .deployments.json > "$temp_file" && mv "$temp_file" .deployments.json
+              fi
+              
+              git add .
+              if ! git diff --cached --quiet; then
+                git commit -m "Remove deployment for deleted branch: $deleted_branch"
+                git push origin gh-pages
+              fi
+            fi
+          fi
