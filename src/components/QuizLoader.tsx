@@ -29,7 +29,7 @@ export default function QuizLoader({ children }: QuizLoaderProps) {
       
       const loadPromises = languagesToLoad.map(async (language) => {
         try {
-          const response = await fetch(`/questions/questions-${language}.json`);
+          const response = await fetch(`questions/questions-${language}.json`);
           if (!response.ok) {
             throw new Error(`Failed to load ${language} questions: ${response.status}`);
           }
