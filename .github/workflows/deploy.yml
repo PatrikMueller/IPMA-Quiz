@@ -112,8 +112,8 @@ jobs:
           if [ -n "${{ steps.branch.outputs.name }}" ]; then
             rm -rf "${{ steps.branch.outputs.name }}"
           else
-            # Main branch - remove root files but preserve branch directories
-            find . -maxdepth 1 -type f ! -name '.git*' ! -name '.deployments.json' ! -name '.nojekyll' -delete
+            # Main branch - remove root files but preserve branch directories and deployments page
+            find . -maxdepth 1 -type f ! -name '.git*' ! -name '.deployments.json' ! -name '.nojekyll' ! -name 'deployments.html' -delete
             find . -maxdepth 1 -name '_next' -type d -exec rm -rf {} + 2>/dev/null || true
           fi
           
@@ -141,6 +141,136 @@ jobs:
             echo "{\"deployments\":[{\"branch\": \"$branch_name\", \"path\": \"${{ steps.branch.outputs.path }}\", \"deployed_at\": \"$current_time\", \"commit\": \"${{ github.sha }}\"}]}" > .deployments.json
           fi
           
+          # Create HTML overview page (separate from main branch index.html)
+          cat > deployments.html <<'EOF'
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>IPMA Quiz - Branch Deployments</title>
+              <style>
+                  * { margin: 0; padding: 0; box-sizing: border-box; }
+                  body {
+                      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+                      line-height: 1.6; background: #f8fafc; color: #334155; min-height: 100vh;
+                  }
+                  .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+                  header { text-align: center; margin-bottom: 3rem; }
+                  h1 { font-size: 2.5rem; color: #1e293b; margin-bottom: 0.5rem; }
+                  .subtitle { color: #64748b; font-size: 1.1rem; }
+                  .deployments { display: grid; gap: 1.5rem; }
+                  .deployment {
+                      background: white; border-radius: 12px; padding: 1.5rem;
+                      box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;
+                      transition: transform 0.2s, box-shadow 0.2s;
+                  }
+                  .deployment:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+                  .deployment.main { border-left: 4px solid #10b981; }
+                  .deployment.branch { border-left: 4px solid #3b82f6; }
+                  .deployment h2 { font-size: 1.5rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+                  .badge { font-size: 0.75rem; padding: 0.25rem 0.5rem; border-radius: 6px; font-weight: 600; text-transform: uppercase; }
+                  .badge.main { background: #d1fae5; color: #065f46; }
+                  .badge.branch { background: #dbeafe; color: #1e3a8a; }
+                  .deployment-link { 
+                      display: inline-block; margin: 1rem 0; padding: 0.75rem 1.5rem;
+                      background: #3b82f6; color: white; text-decoration: none;
+                      border-radius: 8px; font-weight: 500; transition: background 0.2s;
+                  }
+                  .deployment-link:hover { background: #2563eb; }
+                  .meta { font-size: 0.875rem; color: #64748b; margin-top: 1rem; }
+                  .meta div { margin-bottom: 0.25rem; }
+                  .loading { text-align: center; padding: 2rem; color: #64748b; }
+                  .error { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; padding: 1rem; border-radius: 8px; text-align: center; }
+              </style>
+          </head>
+          <body>
+              <div class="container">
+                  <header>
+                      <h1>🎓 IPMA Quiz</h1>
+                      <p class="subtitle">Branch Deployments Overview</p>
+                  </header>
+                  
+                  <div id="deployments" class="deployments">
+                      <div class="loading">Loading deployments...</div>
+                  </div>
+              </div>
+
+              <script>
+                  async function loadDeployments() {
+                      try {
+                          const response = await fetch('./.deployments.json');
+                          const data = await response.json();
+                          const container = document.getElementById('deployments');
+                          
+                          if (!data.deployments || data.deployments.length === 0) {
+                              container.innerHTML = '<div class="error">No deployments found.</div>';
+                              return;
+                          }
+                          
+                          // Sort deployments: main first, then alphabetically
+                          const sorted = data.deployments.sort((a, b) => {
+                              if (a.branch === 'main') return -1;
+                              if (b.branch === 'main') return 1;
+                              return a.branch.localeCompare(b.branch);
+                          });
+                          
+                          container.innerHTML = sorted.map(deployment => {
+                              const isMain = deployment.branch === 'main';
+                              const deployedDate = new Date(deployment.deployed_at);
+                              const formattedDate = deployedDate.toLocaleString();
+                              const relativeTime = getRelativeTime(deployedDate);
+                              
+                              return `
+                                  <div class="deployment ${isMain ? 'main' : 'branch'}">
+                                      <h2>
+                                          ${isMain ? '🚀 Production' : `📋 ${deployment.branch}`}
+                                          <span class="badge ${isMain ? 'main' : 'branch'}">
+                                              ${isMain ? 'Production' : 'Branch'}
+                                          </span>
+                                      </h2>
+                                      <a href="./${deployment.path}" class="deployment-link">
+                                          → View ${isMain ? 'Production' : 'Branch'} Deployment
+                                      </a>
+                                      <div class="meta">
+                                          <div><strong>Last updated:</strong> ${formattedDate} (${relativeTime})</div>
+                                          <div><strong>Commit:</strong> <code>${deployment.commit.substring(0, 8)}</code></div>
+                                          ${isMain ? '<div><strong>Status:</strong> Live Production</div>' : `<div><strong>Status:</strong> Preview Branch</div>`}
+                                      </div>
+                                  </div>
+                              `;
+                          }).join('');
+                          
+                      } catch (error) {
+                          document.getElementById('deployments').innerHTML = 
+                              '<div class="error">Failed to load deployment information.</div>';
+                          console.error('Error loading deployments:', error);
+                      }
+                  }
+                  
+                  function getRelativeTime(date) {
+                      const now = new Date();
+                      const diff = now - date;
+                      const minutes = Math.floor(diff / (1000 * 60));
+                      const hours = Math.floor(diff / (1000 * 60 * 60));
+                      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                      
+                      if (minutes < 1) return 'just now';
+                      if (minutes < 60) return `${minutes} minute${minutes !== 1 ? 's' : ''} ago`;
+                      if (hours < 24) return `${hours} hour${hours !== 1 ? 's' : ''} ago`;
+                      return `${days} day${days !== 1 ? 's' : ''} ago`;
+                  }
+                  
+                  // Load deployments when page loads
+                  loadDeployments();
+                  
+                  // Auto-refresh every 30 seconds
+                  setInterval(loadDeployments, 30000);
+              </script>
+          </body>
+          </html>
+          EOF
+          
           # Commit and push
           git add .
           if ! git diff --cached --quiet; then
@@ -156,14 +286,38 @@ jobs:
             const branch = '${{ steps.branch.outputs.name }}';
             const baseUrl = 'https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}';
             const deployUrl = branch ? `${baseUrl}/${branch}/` : baseUrl;
+            const overviewUrl = `${baseUrl}/deployments.html`;
             
-            const comment = `🚀 **Preview deployment ready!**
+            let comment;
             
-            📍 **Branch**: \`${branch || 'main'}\`
-            🔗 **URL**: ${deployUrl}
+            if (branch) {
+              // Feature branch comment
+              comment = `🚀 **Branch Preview Deployment Ready!**
+            
+            ⚠️ **Important**: The github-pages[bot] comment above shows the wrong URL for branch deployments!
+            
+            📍 **Branch**: \`${branch}\`
+            🔗 **Branch URL**: ${deployUrl}
+            📋 **All Deployments**: ${overviewUrl}
             📝 **Commit**: \`${{ github.sha }}\`
             
-            This preview will be automatically updated with new commits.`;
+            ✅ **Branch-specific features:**
+            - Independent deployment in subdirectory
+            - Automatic cleanup when branch is deleted
+            - Updated with each new commit to this branch
+            
+            💡 **Tip**: Use the branch URL above, not the one from github-pages[bot]!`;
+            } else {
+              // Main branch comment
+              comment = `🚀 **Production Deployment Ready!**
+            
+            📍 **Branch**: \`main\` (Production)
+            🔗 **Production URL**: ${deployUrl}
+            📋 **All Deployments**: ${overviewUrl}
+            📝 **Commit**: \`${{ github.sha }}\`
+            
+            ✅ **Production deployment complete!**`;
+            }
             
             github.rest.issues.createComment({
               issue_number: context.issue.number,
