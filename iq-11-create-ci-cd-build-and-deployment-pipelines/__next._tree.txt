@@ -1,4 +1,4 @@
 :HL["/IPMA-Quiz/iq-11-create-ci-cd-build-and-deployment-pipelines/_next/static/chunks/89884c3daf6922f3.css","style"]
 :HL["/IPMA-Quiz/iq-11-create-ci-cd-build-and-deployment-pipelines/_next/static/media/797e433ab948586e-s.p.dbea232f.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 :HL["/IPMA-Quiz/iq-11-create-ci-cd-build-and-deployment-pipelines/_next/static/media/caa3a2e1cccd8315-s.p.853070df.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
-0:{"buildId":"Ukw9KJmiOGwWsplkpNJa9","tree":{"name":"","paramType":null,"paramKey":"","hasRuntimePrefetch":false,"slots":{"children":{"name":"__PAGE__","paramType":null,"paramKey":"__PAGE__","hasRuntimePrefetch":false,"slots":null,"isRootLayout":false}},"isRootLayout":true},"staleTime":300}
+0:{"buildId":"kh6VjgRXuiWg1HEtvvBmK","tree":{"name":"","paramType":null,"paramKey":"","hasRuntimePrefetch":false,"slots":{"children":{"name":"__PAGE__","paramType":null,"paramKey":"__PAGE__","hasRuntimePrefetch":false,"slots":null,"isRootLayout":false}},"isRootLayout":true},"staleTime":300}
