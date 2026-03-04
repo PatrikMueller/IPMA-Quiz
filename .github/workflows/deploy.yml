@@ -42,11 +42,10 @@ jobs:
     name: 'Build & Deploy'
     runs-on: ubuntu-latest
     needs: lint
-    if: github.event_name != 'delete'
+    if: github.event_name == 'push'
     
     permissions:
       contents: write
-      pull-requests: write
     
     steps:
       - name: Checkout code
@@ -375,52 +374,49 @@ jobs:
           name: deployment-redirect-${{ steps.branch.outputs.name || 'main' }}
           path: redirect-artifact/
           retention-days: 30
+
+  pr-comment:
+    name: 'PR Comment'
+    runs-on: ubuntu-latest
+    needs: lint
+    if: github.event_name == 'pull_request'
+    
+    permissions:
+      pull-requests: write
+    
+    steps:
+      - name: Get branch info from PR
+        id: branch
+        run: |
+          branch_name=$(echo "${{ github.event.pull_request.head.ref }}" | sed 's/[^a-zA-Z0-9]/-/g' | tr '[:upper:]' '[:lower:]')
+          echo "name=$branch_name" >> $GITHUB_OUTPUT
           
-      - name: Comment on PR
-        if: github.event_name == 'pull_request'
+      - name: Comment on PR with branch deployment link
         uses: actions/github-script@v7
         with:
           script: |
-            const branch = '${{ steps.branch.outputs.name }}';
+            const branchName = '${{ steps.branch.outputs.name }}';
             const baseUrl = 'https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}';
-            const deployUrl = branch ? `${baseUrl}/${branch}/` : baseUrl;
+            const deployUrl = `${baseUrl}/${branchName}/`;
             const overviewUrl = `${baseUrl}/deployments.html`;
             
-            let comment;
-            
-            if (branch) {
-              // Feature branch comment
-              comment = `🚀 **Branch Preview Deployment Ready!**
+            const comment = `🚀 **Branch Preview Available!**
             
             ⚠️ **Important**: The github-pages[bot] comment above shows the wrong URL for branch deployments!
             
-            📍 **Branch**: \`${branch}\`
-            🔗 **Branch URL**: ${deployUrl}
+            📍 **Branch**: \`${{ github.event.pull_request.head.ref }}\`
+            🔗 **Correct Branch URL**: ${deployUrl}
             📋 **All Deployments**: ${overviewUrl}
-            📦 **HTML Redirect**: Download the \`deployment-redirect-${branch}\` artifact for a redirect page
-            📝 **Commit**: \`${{ github.sha }}\`
+            📝 **Head Commit**: \`${{ github.event.pull_request.head.sha }}\`
             
-            ✅ **Branch-specific features:**
+            ✅ **Branch-specific preview:**
             - Independent deployment in subdirectory  
+            - Updated when you push to this branch
             - Automatic cleanup when branch is deleted
-            - Updated with each new commit to this branch
-            - HTML redirect artifact with correct URL
             
-            💡 **Tips:** 
-            - Use the branch URL above, not the one from github-pages[bot]!
-            - Download the artifact for an HTML redirect page with countdown`;
-            } else {
-              // Main branch comment
-              comment = `🚀 **Production Deployment Ready!**
+            💡 **Important**: This PR does NOT create a new deployment. It links to the existing branch deployment that was created when you pushed to the branch.
             
-            📍 **Branch**: \`main\` (Production)
-            🔗 **Production URL**: ${deployUrl}
-            📋 **All Deployments**: ${overviewUrl}
-            📦 **HTML Redirect**: Download the \`deployment-redirect-main\` artifact
-            📝 **Commit**: \`${{ github.sha }}\`
-            
-            ✅ **Production deployment complete!**`;
-            }
+            📦 **HTML Redirect**: Look for the \`deployment-redirect-${branchName}\` artifact in the latest push action on this branch.`;
             
             github.rest.issues.createComment({
               issue_number: context.issue.number,
