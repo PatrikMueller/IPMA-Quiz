@@ -82,6 +82,91 @@ jobs:
           export NEXT_PUBLIC_BASE_PATH="/${{ steps.branch.outputs.path }}"
           npm run build
           
+      - name: Create HTML redirect artifact
+        run: |
+          # Create redirect HTML file
+          mkdir -p redirect-artifact
+          branch_name="${{ steps.branch.outputs.name }}"
+          if [ -z "$branch_name" ]; then
+            branch_name="main"
+            deploy_url="https://patrikmueller.github.io/IPMA-Quiz/"
+          else
+            deploy_url="https://patrikmueller.github.io/IPMA-Quiz/$branch_name/"
+          fi
+          
+          cat > redirect-artifact/redirect.html <<EOF
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>IPMA Quiz - Redirecting to ${branch_name}</title>
+              <meta http-equiv="refresh" content="3;url=${deploy_url}">
+              <style>
+                  body {
+                      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                      display: flex; align-items: center; justify-content: center;
+                      min-height: 100vh; margin: 0; background: #f8fafc;
+                      flex-direction: column; text-align: center; color: #334155;
+                  }
+                  .container {
+                      background: white; padding: 3rem; border-radius: 12px;
+                      box-shadow: 0 4px 20px rgba(0,0,0,0.1); max-width: 500px;
+                  }
+                  h1 { color: #1e293b; margin-bottom: 1rem; font-size: 2rem; }
+                  .branch { background: #dbeafe; color: #1e3a8a; padding: 0.5rem 1rem; border-radius: 6px; font-weight: 600; }
+                  .countdown { font-size: 1.5rem; font-weight: bold; color: #3b82f6; }
+                  .links { margin-top: 2rem; }
+                  a { 
+                      display: inline-block; margin: 0.5rem; padding: 0.75rem 1.5rem;
+                      background: #3b82f6; color: white; text-decoration: none;
+                      border-radius: 8px; transition: background 0.2s;
+                  }
+                  a:hover { background: #2563eb; }
+                  .overview { background: #10b981; }
+                  .overview:hover { background: #059669; }
+              </style>
+              <script>
+                  let countdown = 3;
+                  function updateCountdown() {
+                      document.getElementById('countdown').textContent = countdown;
+                      if (countdown <= 0) {
+                          window.location.href = '${deploy_url}';
+                      } else {
+                          countdown--;
+                          setTimeout(updateCountdown, 1000);
+                      }
+                  }
+                  window.onload = updateCountdown;
+              </script>
+          </head>
+          <body>
+              <div class="container">
+                  <h1>🚀 IPMA Quiz Deployment</h1>
+                  <p>Branch: <span class="branch">${branch_name}</span></p>
+                  <p>Redirecting in <span id="countdown" class="countdown">3</span> seconds...</p>
+                  
+                  <div class="links">
+                      <a href="${deploy_url}">→ Go to Deployment</a>
+                      <a href="https://patrikmueller.github.io/IPMA-Quiz/deployments.html" class="overview">📋 All Deployments</a>
+                  </div>
+                  
+                  <p style="margin-top: 2rem; font-size: 0.875rem; color: #64748b;">
+                      <strong>Note:</strong> This is the correct URL for branch <strong>${branch_name}</strong>.
+                      The github-pages[bot] URL is incorrect for feature branches.
+                  </p>
+              </div>
+          </body>
+          </html>
+          EOF
+          
+      - name: Upload redirect artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-redirect-${{ steps.branch.outputs.name || 'main' }}
+          path: redirect-artifact/
+          retention-days: 30
+          
       - name: Deploy to gh-pages
         run: |
           # Clone or create gh-pages branch
@@ -299,7 +384,7 @@ jobs:
             📍 **Branch**: \`${branch}\`
             🔗 **Branch URL**: ${deployUrl}
             📋 **All Deployments**: ${overviewUrl}
-            📝 **Commit**: \`${{ github.sha }}\`
+             **Commit**: \`${{ github.sha }}\`
             
             ✅ **Branch-specific features:**
             - Independent deployment in subdirectory
