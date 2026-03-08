@@ -1,0 +1,88 @@
+{
+  "header": {
+    "title": "IPMA-Quiz",
+    "subtitle": "IPMA Certification Practice",
+    "startOver": "Start Over"
+  },
+  "modes": {
+    "title": "Choose Quiz Mode",
+    "practice": {
+      "title": "Practice Mode",
+      "description": "Get immediate feedback and explanations after each question. Perfect for learning and improving your knowledge."
+    },
+    "exam": {
+      "title": "Exam Mode", 
+      "description": "Simulate real exam conditions. Feedback and explanations shown only at the end. Test your readiness!"
+    }
+  },
+  "language": {
+    "title": "Select Language"
+  },
+  "categories": {
+    "title": "Select Categories",
+    "subtitle": "Choose one or more categories for your quiz",
+    "all": "All Categories",
+    "selected": "Selected",
+    "startQuiz": "Start Quiz",
+    "selectAtLeastOne": "Select at least one category"
+  },
+  "quiz": {
+    "practiceMode": "Practice Mode",
+    "examMode": "Exam Mode",
+    "question": "Question",
+    "of": "of",
+    "selectAllThatApply": "Select all that apply",
+    "submitAnswer": "Submit Answer",
+    "nextQuestion": "Next Question",
+    "finishQuiz": "Finish Quiz",
+    "backToSetup": "Back to Setup",
+    "time": "Time",
+    "categories": "Categories",
+    "all": "All"
+  },
+  "feedback": {
+    "correct": "Correct!",
+    "incorrect": "Incorrect",
+    "correctDescription": "Well done! You got it right.",
+    "incorrectDescription": "Not quite right. Let's review the correct answer.",
+    "yourAnswer": "Your Answer:",
+    "correctAnswer": "Correct Answer:",
+    "explanation": "Explanation",
+    "nextQuestion": "Next Question",
+    "viewResults": "View Results",
+    "noAnswer": "No answer selected"
+  },
+  "results": {
+    "title": "Quiz Complete!",
+    "excellent": "Excellent! Outstanding performance!",
+    "veryGood": "Very Good! Well done!",
+    "good": "Good! Keep up the good work!",
+    "fair": "Fair. Room for improvement.",
+    "needsImprovement": "Needs improvement. Consider more practice.",
+    "totalQuestions": "Total Questions",
+    "correct": "Correct",
+    "incorrect": "Incorrect",
+    "timeTaken": "Time Taken",
+    "takeAnotherQuiz": "Take Another Quiz",
+    "changeSettings": "Change Settings",
+    "reviewAnswers": "Review Answers",
+    "yourAnswer": "Your Answer:",
+    "correctAnswer": "Correct Answer:",
+    "explanation": "Explanation:",
+    "noAnswer": "No answer"
+  },
+  "loading": {
+    "loadingQuizData": "Loading quiz data..."
+  },
+  "errors": {
+    "errorLoadingQuiz": "Error Loading Quiz",
+    "retry": "Retry",
+    "noQuestions": "No questions available for selected categories",
+    "unknownState": "Unknown app state:",
+    "reset": "Reset",
+    "noQuestionsAvailable": "Error: No questions available"
+  },
+  "footer": {
+    "copyright": "© 2026 IPMA-Quiz. Educational tool for IPMA certification preparation."
+  }
+}

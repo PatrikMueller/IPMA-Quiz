@@ -1,0 +1,88 @@
+{
+  "header": {
+    "title": "IPMA-Quiz",
+    "subtitle": "IPMA Zertifizierungsvorbereitung",
+    "startOver": "Von vorne beginnen"
+  },
+  "modes": {
+    "title": "Quiz-Modus wählen",
+    "practice": {
+      "title": "Übungsmodus",
+      "description": "Erhalten Sie sofortiges Feedback und Erklärungen nach jeder Frage. Perfekt zum Lernen und Verbessern Ihres Wissens."
+    },
+    "exam": {
+      "title": "Prüfungsmodus",
+      "description": "Simulieren Sie echte Prüfungsbedingungen. Feedback und Erklärungen werden erst am Ende gezeigt. Testen Sie Ihre Bereitschaft!"
+    }
+  },
+  "language": {
+    "title": "Sprache auswählen"
+  },
+  "categories": {
+    "title": "Kategorien auswählen",
+    "subtitle": "Wählen Sie eine oder mehrere Kategorien für Ihr Quiz",
+    "all": "Alle Kategorien",
+    "selected": "Ausgewählt",
+    "startQuiz": "Quiz starten",
+    "selectAtLeastOne": "Mindestens eine Kategorie auswählen"
+  },
+  "quiz": {
+    "practiceMode": "Übungsmodus",
+    "examMode": "Prüfungsmodus",
+    "question": "Frage",
+    "of": "von",
+    "selectAllThatApply": "Alle zutreffenden auswählen",
+    "submitAnswer": "Antwort abschicken",
+    "nextQuestion": "Nächste Frage",
+    "finishQuiz": "Quiz beenden",
+    "backToSetup": "Zurück zum Setup",
+    "time": "Zeit",
+    "categories": "Kategorien",
+    "all": "Alle"
+  },
+  "feedback": {
+    "correct": "Richtig!",
+    "incorrect": "Falsch",
+    "correctDescription": "Gut gemacht! Sie haben es richtig.",
+    "incorrectDescription": "Nicht ganz richtig. Lassen Sie uns die korrekte Antwort durchgehen.",
+    "yourAnswer": "Ihre Antwort:",
+    "correctAnswer": "Korrekte Antwort:",
+    "explanation": "Erklärung",
+    "nextQuestion": "Nächste Frage",
+    "viewResults": "Ergebnisse ansehen",
+    "noAnswer": "Keine Antwort ausgewählt"
+  },
+  "results": {
+    "title": "Quiz abgeschlossen!",
+    "excellent": "Ausgezeichnet! Hervorragende Leistung!",
+    "veryGood": "Sehr gut! Gut gemacht!",
+    "good": "Gut! Machen Sie weiter so!",
+    "fair": "Befriedigend. Verbesserungsmöglichkeiten vorhanden.",
+    "needsImprovement": "Verbesserung nötig. Erwägen Sie mehr Übung.",
+    "totalQuestions": "Gesamte Fragen",
+    "correct": "Richtig",
+    "incorrect": "Falsch",
+    "timeTaken": "Benötigte Zeit",
+    "takeAnotherQuiz": "Neues Quiz starten",
+    "changeSettings": "Einstellungen ändern",
+    "reviewAnswers": "Antworten überprüfen",
+    "yourAnswer": "Ihre Antwort:",
+    "correctAnswer": "Korrekte Antwort:",
+    "explanation": "Erklärung:",
+    "noAnswer": "Keine Antwort"
+  },
+  "loading": {
+    "loadingQuizData": "Quiz-Daten werden geladen..."
+  },
+  "errors": {
+    "errorLoadingQuiz": "Fehler beim Laden des Quiz",
+    "retry": "Wiederholen",
+    "noQuestions": "Keine Fragen für die ausgewählten Kategorien verfügbar",
+    "unknownState": "Unbekannter App-Zustand:",
+    "reset": "Zurücksetzen",
+    "noQuestionsAvailable": "Fehler: Keine Fragen verfügbar"
+  },
+  "footer": {
+    "copyright": "© 2026 IPMA-Quiz. Bildungstool für die IPMA-Zertifizierungsvorbereitung."
+  }
+}
