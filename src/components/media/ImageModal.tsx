@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 
 interface ImageModalProps {
   isOpen: boolean;
@@ -10,18 +10,55 @@ interface ImageModalProps {
   caption?: string;
 }
 
+interface Position {
+  x: number;
+  y: number;
+}
+
+interface TouchData {
+  distance: number;
+  center: Position;
+  scale: number;
+  position: Position;
+}
+
 export default function ImageModal({ isOpen, onClose, src, alt, caption }: ImageModalProps) {
+  // Core state
   const [isLoading, setIsLoading] = useState(true);
   const [scale, setScale] = useState(1);
-  const [translateX, setTranslateX] = useState(0);
-  const [translateY, setTranslateY] = useState(0);
+  const [position, setPosition] = useState<Position>({ x: 0, y: 0 });
+  
+  // Interaction state
   const [isDragging, setIsDragging] = useState(false);
-  const [startTouch, setStartTouch] = useState({ x: 0, y: 0 });
+  const [dragStart, setDragStart] = useState<Position>({ x: 0, y: 0 });
+  const [positionStart, setPositionStart] = useState<Position>({ x: 0, y: 0 });
+  
+  // Touch state
+  const [touchData, setTouchData] = useState<TouchData | null>(null);
   const [lastTap, setLastTap] = useState(0);
+  
+  // Refs
   const modalRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
+  
+  // Constants
+  const MIN_SCALE = 0.5;
+  const MAX_SCALE = 5;
+  const DOUBLE_TAP_DELAY = 300;
+  const ZOOM_STEP = 0.3;
 
-  // Handle keyboard events
+  // Reset state when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setScale(1);
+      setPosition({ x: 0, y: 0 });
+      setIsLoading(true);
+      setIsDragging(false);
+      setTouchData(null);
+    }
+  }, [isOpen]);
+
+  // Keyboard and body scroll handling
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -40,161 +77,229 @@ export default function ImageModal({ isOpen, onClose, src, alt, caption }: Image
     };
   }, [isOpen, onClose]);
 
-  // Reset modal state when opened/closed
-  useEffect(() => {
-    if (isOpen) {
-      setScale(1);
-      setTranslateX(0);
-      setTranslateY(0);
-      setIsLoading(true);
-    }
-  }, [isOpen]);
+  // Utility functions
+  const getDistance = (touch1: React.Touch, touch2: React.Touch): number => {
+    const dx = touch1.clientX - touch2.clientX;
+    const dy = touch1.clientY - touch2.clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  };
 
-  // Handle image load
+  const getCenter = (touch1: React.Touch, touch2: React.Touch): Position => ({
+    x: (touch1.clientX + touch2.clientX) / 2,
+    y: (touch1.clientY + touch2.clientY) / 2,
+  });
+
+  const constrainScale = (newScale: number): number => {
+    return Math.max(MIN_SCALE, Math.min(MAX_SCALE, newScale));
+  };
+
+  const zoomToPoint = useCallback((newScale: number, point: Position) => {
+    if (!imageRef.current) return;
+    
+    const constrainedScale = constrainScale(newScale);
+    const scaleDiff = constrainedScale - scale;
+    
+    if (Math.abs(scaleDiff) < 0.01) return;
+    
+    const rect = imageRef.current.getBoundingClientRect();
+    const imageCenter = {
+      x: rect.left + rect.width / 2,
+      y: rect.top + rect.height / 2,
+    };
+    
+    const deltaX = (point.x - imageCenter.x) * (scaleDiff / scale);
+    const deltaY = (point.y - imageCenter.y) * (scaleDiff / scale);
+    
+    setScale(constrainedScale);
+    setPosition(prev => ({
+      x: prev.x - deltaX,
+      y: prev.y - deltaY,
+    }));
+  }, [scale]);
+
+  const resetZoom = useCallback(() => {
+    setScale(1);
+    setPosition({ x: 0, y: 0 });
+  }, []);
+
+  // Event handlers
   const handleImageLoad = () => {
     setIsLoading(false);
   };
 
-  // Handle background click
   const handleBackgroundClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
+    if (e.target === e.currentTarget && scale === 1) {
       onClose();
     }
   };
 
-  // Handle touch start
+  // Mouse events
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (e.button !== 0) return; // Only left click
+    
+    e.preventDefault();
+    setIsDragging(true);
+    setDragStart({ x: e.clientX, y: e.clientY });
+    setPositionStart(position);
+  };
+
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (!isDragging) return;
+    
+    const deltaX = e.clientX - dragStart.x;
+    const deltaY = e.clientY - dragStart.y;
+    
+    setPosition({
+      x: positionStart.x + deltaX,
+      y: positionStart.y + deltaY,
+    });
+  }, [isDragging, dragStart, positionStart]);
+
+  const handleMouseUp = useCallback(() => {
+    setIsDragging(false);
+  }, []);
+
+  const handleWheel = (e: React.WheelEvent) => {
+    e.preventDefault();
+    
+    const delta = e.deltaY > 0 ? -ZOOM_STEP : ZOOM_STEP;
+    const newScale = scale + delta;
+    const point = { x: e.clientX, y: e.clientY };
+    
+    zoomToPoint(newScale, point);
+  };
+
+  const handleDoubleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    
+    const point = { x: e.clientX, y: e.clientY };
+    const newScale = scale > 1 ? 1 : 2;
+    
+    if (newScale === 1) {
+      resetZoom();
+    } else {
+      zoomToPoint(newScale, point);
+    }
+  };
+
+  // Touch events
   const handleTouchStart = (e: React.TouchEvent) => {
+    e.preventDefault();
+    
     if (e.touches.length === 1) {
       const touch = e.touches[0];
-      setStartTouch({ x: touch.clientX, y: touch.clientY });
-      setIsDragging(true);
-
-      // Handle double tap to zoom
-      const currentTime = new Date().getTime();
-      const tapLength = currentTime - lastTap;
-      if (tapLength < 300 && tapLength > 0) {
-        e.preventDefault();
-        if (scale === 1) {
-          setScale(2);
-        } else {
-          setScale(1);
-          setTranslateX(0);
-          setTranslateY(0);
-        }
-      }
-      setLastTap(currentTime);
-    }
-  };
-
-  // Handle touch move
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging || e.touches.length !== 1) return;
-
-    const touch = e.touches[0];
-    const deltaX = touch.clientX - startTouch.x;
-    const deltaY = touch.clientY - startTouch.y;
-
-    if (scale > 1) {
-      // Pan when zoomed in
-      setTranslateX(prev => prev + deltaX * 0.5);
-      setTranslateY(prev => prev + deltaY * 0.5);
-      setStartTouch({ x: touch.clientX, y: touch.clientY });
-    } else {
-      // Swipe down to close
-      if (deltaY > 100) {
-        onClose();
-      }
-    }
-  };
-
-  // Handle touch end
-  const handleTouchEnd = () => {
-    setIsDragging(false);
-  };
-
-  // Handle pinch zoom
-  const handleTouchStartPinch = (e: React.TouchEvent) => {
-    if (e.touches.length === 2) {
-      const touch1 = e.touches[0];
-      const touch2 = e.touches[1];
-      const distance = Math.sqrt(
-        Math.pow(touch2.clientX - touch1.clientX, 2) +
-        Math.pow(touch2.clientY - touch1.clientY, 2)
-      );
+      const now = Date.now();
       
-      // Store initial distance for pinch zoom calculation
-      (e.currentTarget as any).initialDistance = distance;
-      (e.currentTarget as any).initialScale = scale;
-    }
-  };
-
-  const handleTouchMovePinch = (e: React.TouchEvent) => {
-    if (e.touches.length === 2) {
-      const touch1 = e.touches[0];
-      const touch2 = e.touches[1];
-      const distance = Math.sqrt(
-        Math.pow(touch2.clientX - touch1.clientX, 2) +
-        Math.pow(touch2.clientY - touch1.clientY, 2)
-      );
-      
-      const initialDistance = (e.currentTarget as any).initialDistance;
-      const initialScale = (e.currentTarget as any).initialScale || 1;
-      
-      if (initialDistance) {
-        const newScale = Math.max(1, Math.min(3, initialScale * (distance / initialDistance)));
-        setScale(newScale);
+      // Handle double tap
+      if (now - lastTap < DOUBLE_TAP_DELAY) {
+        const point = { x: touch.clientX, y: touch.clientY };
+        const newScale = scale > 1 ? 1 : 2;
         
-        // Reset translation when scaling back to 1
         if (newScale === 1) {
-          setTranslateX(0);
-          setTranslateY(0);
+          resetZoom();
+        } else {
+          zoomToPoint(newScale, point);
         }
+        setLastTap(0);
+      } else {
+        setLastTap(now);
+        setIsDragging(true);
+        setDragStart({ x: touch.clientX, y: touch.clientY });
+        setPositionStart(position);
       }
+    } else if (e.touches.length === 2) {
+      // Pinch zoom start
+      const touch1 = e.touches[0];
+      const touch2 = e.touches[1];
+      
+      setTouchData({
+        distance: getDistance(touch1, touch2),
+        center: getCenter(touch1, touch2),
+        scale: scale,
+        position: position,
+      });
+      setIsDragging(false);
     }
   };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    e.preventDefault();
+    
+    if (e.touches.length === 1 && isDragging) {
+      // Single touch drag
+      const touch = e.touches[0];
+      const deltaX = touch.clientX - dragStart.x;
+      const deltaY = touch.clientY - dragStart.y;
+      
+      setPosition({
+        x: positionStart.x + deltaX,
+        y: positionStart.y + deltaY,
+      });
+    } else if (e.touches.length === 2 && touchData) {
+      // Pinch zoom
+      const touch1 = e.touches[0];
+      const touch2 = e.touches[1];
+      
+      const currentDistance = getDistance(touch1, touch2);
+      const currentCenter = getCenter(touch1, touch2);
+      
+      const scaleChange = currentDistance / touchData.distance;
+      const newScale = constrainScale(touchData.scale * scaleChange);
+      
+      const centerDeltaX = currentCenter.x - touchData.center.x;
+      const centerDeltaY = currentCenter.y - touchData.center.y;
+      
+      setScale(newScale);
+      setPosition({
+        x: touchData.position.x + centerDeltaX,
+        y: touchData.position.y + centerDeltaY,
+      });
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (e.touches.length === 0) {
+      setIsDragging(false);
+      setTouchData(null);
+    } else if (e.touches.length === 1) {
+      setTouchData(null);
+    }
+  };
+
+  // Mouse event listeners
+  useEffect(() => {
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    }
+    
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging, handleMouseMove, handleMouseUp]);
 
   if (!isOpen) return null;
 
   return (
     <div
       ref={modalRef}
-      className="fixed inset-0 z-50 bg-black bg-opacity-90 flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 bg-black bg-opacity-95 overflow-hidden"
       onClick={handleBackgroundClick}
       role="dialog"
       aria-modal="true"
       aria-labelledby="image-modal-title"
     >
       {/* Close button */}
-      <div
-        onClick={(e) => {
-          e.stopPropagation();
-          onClose();
-        }}
-        className="absolute top-4 right-4 z-10 text-white hover:text-gray-300 transition-colors cursor-pointer"
+      <button
+        onClick={onClose}
+        className="absolute top-4 right-4 z-10 text-white hover:text-gray-300 transition-colors p-2 rounded-full hover:bg-black/20"
         aria-label="Close modal"
-        role="button"
-        tabIndex={0}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            onClose();
-          }
-        }}
       >
-        <svg 
-          className="w-8 h-8" 
-          fill="none" 
-          stroke="currentColor" 
-          viewBox="0 0 24 24"
-        >
-          <path 
-            strokeLinecap="round" 
-            strokeLinejoin="round" 
-            strokeWidth={2} 
-            d="M6 18L18 6M6 6l12 12" 
-          />
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
         </svg>
-      </div>
+      </button>
 
       {/* Loading spinner */}
       {isLoading && (
@@ -203,40 +308,33 @@ export default function ImageModal({ isOpen, onClose, src, alt, caption }: Image
         </div>
       )}
 
-      {/* Image container */}
-      <div className="relative max-w-full max-h-full overflow-hidden">
-        <img
-          ref={imageRef}
-          src={src}
-          alt={alt}
-          onLoad={handleImageLoad}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-          onTouchStartCapture={handleTouchStartPinch}
-          onTouchMoveCapture={handleTouchMovePinch}
-          className={`max-w-full max-h-[85vh] object-contain transition-all duration-300 ${
-            isLoading ? 'opacity-0' : 'opacity-100'
-          } ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
-          style={{
-            transform: `scale(${scale}) translate(${translateX}px, ${translateY}px)`,
-            touchAction: 'none'
-          }}
-          draggable={false}
-        />
-        
-        {/* Caption */}
-        {caption && !isLoading && (
-          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-70 text-white px-4 py-2 rounded-lg text-sm max-w-full">
-            <p className="text-center">{caption}</p>
-          </div>
-        )}
-      </div>
-
-      {/* Instructions hint for mobile */}
-      {!isLoading && (
-        <div className="absolute bottom-4 left-4 text-white text-xs opacity-60 md:hidden">
-          <p>Double tap to zoom • Swipe down to close</p>
+      {/* Image */}
+      <img
+        ref={imageRef}
+        src={src}
+        alt={alt}
+        onLoad={handleImageLoad}
+        onMouseDown={handleMouseDown}
+        onWheel={handleWheel}
+        onDoubleClick={handleDoubleClick}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ${
+          isLoading ? 'opacity-0' : 'opacity-100'
+        } ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
+        style={{
+          transform: `scale(${scale}) translate(${position.x / scale}px, ${position.y / scale}px)`,
+          transformOrigin: 'center center',
+          touchAction: 'none',
+        }}
+        draggable={false}
+      />
+      
+      {/* Caption */}
+      {caption && !isLoading && (
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/70 text-white px-4 py-2 rounded-lg text-sm max-w-[90%] backdrop-blur-sm">
+          <p className="text-center">{caption}</p>
         </div>
       )}
     </div>
