@@ -8,7 +8,7 @@
       "categories": ["Führung", "Projektplanung"],
       "question": [
         { "type": "text", "value": "Was ist die Hauptaufgabe eines Projektleiters in der Initialisierungsphase?" },
-        { "type": "image", "src": "/img/test.jpg", "alt": "Projektphasen Diagramm", "caption": "Typischer Projektlebenszyklus" }
+        { "type": "image", "src": "./img/test.jpg", "alt": "Projektphasen Diagramm", "caption": "Typischer Projektlebenszyklus" }
       ],
       "options": [
         [
@@ -35,7 +35,7 @@
       "categories": ["Kommunikation", "Führung"],
       "question": [
         { "type": "text", "value": "Schauen Sie sich das folgende Video über Projektkommunikation an und beantworten Sie die Frage:" },
-        { "type": "video", "src": "/video/test.mp4", "caption": "Stakeholder-Meeting Beispiel" },
+        { "type": "video", "src": "./video/test.mp4", "caption": "Stakeholder-Meeting Beispiel" },
         { "type": "text", "value": "Welche der folgenden Punkte sind Schlüsselelemente einer effektiven Projektkommunikation? (Alle zutreffenden auswählen)" }
       ],
       "options": [
@@ -63,7 +63,7 @@
       "categories": ["Risikomanagement", "Projektplanung"],
       "question": [
         { "type": "text", "value": "Betrachten Sie das folgende Risikomanagement-Szenario:" },
-        { "type": "image", "src": "/img/test.jpg", "alt": "Risikomanagement Prozess", "caption": "Risikomanagement-Zyklus" },
+        { "type": "image", "src": "./img/test.jpg", "alt": "Risikomanagement Prozess", "caption": "Risikomanagement-Zyklus" },
         { "type": "text", "value": "Was ist der erste Schritt im Risikomanagement-Prozess?" }
       ],
       "options": [
@@ -95,7 +95,7 @@
       "options": [
         [
           { "type": "text", "value": "Erforderliche Fähigkeiten und Kompetenzen" },
-          { "type": "image", "src": "/img/test.jpg", "alt": "Skills Matrix", "caption": "Kompetenzmatrix" }
+          { "type": "image", "src": "./img/test.jpg", "alt": "Skills Matrix", "caption": "Kompetenzmatrix" }
         ],
         [
           { "type": "text", "value": "Ressourcenverfügbarkeit und -beschränkungen" }
@@ -144,13 +144,13 @@
       "categories": ["Kommunikation", "Risikomanagement", "Führung"],
       "question": [
         { "type": "text", "value": "Komplexes Szenario: Sie leiten ein kritisches IT-Projekt. Betrachten Sie die Situation:" },
-        { "type": "video", "src": "/video/test.mp4", "caption": "Krisenkommunikation im Projekt" },
+        { "type": "video", "src": "./video/test.mp4", "caption": "Krisenkommunikation im Projekt" },
         { "type": "text", "value": "Das Projekt hat technische Probleme und Stakeholder sind besorgt. Was ist Ihre erste Priorität?" }
       ],
       "options": [
         [
           { "type": "text", "value": "Sofort alle Stakeholder über die Probleme informieren" },
-          { "type": "image", "src": "/img/test.jpg", "alt": "Stakeholder Meeting", "caption": "Transparente Kommunikation" }
+          { "type": "image", "src": "./img/test.jpg", "alt": "Stakeholder Meeting", "caption": "Transparente Kommunikation" }
         ],
         [
           { "type": "text", "value": "Erst eine Lösung finden, dann kommunizieren" }

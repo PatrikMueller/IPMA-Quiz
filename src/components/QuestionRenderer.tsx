@@ -1,4 +1,6 @@
 import { RichTextContent } from '@/types/quiz';
+import ImageViewer from './media/ImageViewer';
+import OptimizedVideo from './media/OptimizedVideo';
 
 interface QuestionRendererProps {
   content: RichTextContent[];
@@ -27,59 +29,25 @@ function RichContentItem({ content }: { content: RichTextContent }) {
     case 'image':
       return (
         <div className="my-4">
-          <img
-            src={content.src}
+          <ImageViewer
+            src={content.src || ''}
             alt={content.alt || 'Question image'}
+            caption={content.caption}
             className="max-w-full h-auto rounded-lg shadow-md mx-auto"
             loading="lazy"
-            onError={(e) => {
-              // Handle broken images gracefully
-              const target = e.target as HTMLImageElement;
-              target.style.display = 'none';
-              const parent = target.parentElement;
-              if (parent) {
-                const errorMsg = document.createElement('div');
-                errorMsg.className = 'text-sm text-gray-500 dark:text-gray-400 p-4 bg-gray-100 dark:bg-gray-700 rounded border-2 border-dashed border-gray-300 dark:border-gray-600 text-center';
-                errorMsg.textContent = `Image not available: ${content.alt || 'Question image'}`;
-                parent.appendChild(errorMsg);
-              }
-            }}
           />
-          {content.caption && (
-            <p className="text-sm text-gray-600 dark:text-gray-400 text-center mt-2 italic">
-              {content.caption}
-            </p>
-          )}
         </div>
       );
 
     case 'video':
       return (
         <div className="my-4">
-          <video
-            src={content.src}
-            controls
+          <OptimizedVideo
+            src={content.src || ''}
+            caption={content.caption}
             className="max-w-full h-auto rounded-lg shadow-md mx-auto"
-            onError={(e) => {
-              // Handle broken videos gracefully
-              const target = e.target as HTMLVideoElement;
-              target.style.display = 'none';
-              const parent = target.parentElement;
-              if (parent) {
-                const errorMsg = document.createElement('div');
-                errorMsg.className = 'text-sm text-gray-500 dark:text-gray-400 p-4 bg-gray-100 dark:bg-gray-700 rounded border-2 border-dashed border-gray-300 dark:border-gray-600 text-center';
-                errorMsg.textContent = `Video not available: ${content.caption || 'Question video'}`;
-                parent.appendChild(errorMsg);
-              }
-            }}
-          >
-            Your browser does not support the video tag.
-          </video>
-          {content.caption && (
-            <p className="text-sm text-gray-600 dark:text-gray-400 text-center mt-2 italic">
-              {content.caption}
-            </p>
-          )}
+            loading="lazy"
+          />
         </div>
       );
 

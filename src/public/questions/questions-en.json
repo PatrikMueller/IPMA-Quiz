@@ -6,206 +6,166 @@
     {
       "id": "pm-role-001",
       "categories": ["Leadership", "Project Planning"],
-      "question": {
-        "type": "rich-text",
-        "content": [
-          { "type": "text", "value": "What is the primary role of a project manager in the initiation phase?" }
-        ]
-      },
+      "question": [
+        { "type": "text", "value": "What is the main task of a project manager in the initiation phase?" },
+        { "type": "image", "src": "./img/test.jpg", "alt": "Project phases diagram", "caption": "Typical project lifecycle" }
+      ],
       "options": [
-        {
-          "type": "text",
-          "content": [
-            { "type": "text", "value": "Define project scope and objectives" }
-          ]
-        },
-        {
-          "type": "text",
-          "content": [
-            { "type": "text", "value": "Execute project deliverables" }
-          ]
-        },
-        {
-          "type": "text",
-          "content": [
-            { "type": "text", "value": "Monitor and control project performance" }
-          ]
-        },
-        {
-          "type": "text",
-          "content": [
-            { "type": "text", "value": "Close project and document lessons learned" }
-          ]
-        }
+        [
+          { "type": "text", "value": "Define project scope and objectives" }
+        ],
+        [
+          { "type": "text", "value": "Implement project deliverables" }
+        ],
+        [
+          { "type": "text", "value": "Monitor and control project performance" }
+        ],
+        [
+          { "type": "text", "value": "Close project and document lessons learned" }
+        ]
       ],
       "multiple": false,
       "correctAnswers": [0],
       "explanation": [
-        { "type": "text", "value": "During the initiation phase, the project manager's primary role is to define the project scope, objectives, and stakeholder requirements. This establishes the foundation for all subsequent project activities." }
+        { "type": "text", "value": "During the initiation phase, the project manager's main task is defining the project scope, objectives, and stakeholder requirements. This creates the foundation for all subsequent project activities." }
       ]
     },
     {
       "id": "communication-002",
       "categories": ["Communication", "Leadership"],
-      "question": {
-        "type": "rich-text",
-        "content": [
-          { "type": "text", "value": "Which of the following are key elements of effective project communication? (Select all that apply)" }
-        ]
-      },
+      "question": [
+        { "type": "text", "value": "Watch the following video about project communication and answer the question:" },
+        { "type": "video", "src": "./video/test.mp4", "caption": "Stakeholder meeting example" },
+        { "type": "text", "value": "Which of the following are key elements of effective project communication? (Select all that apply)" }
+      ],
       "options": [
-        {
-          "type": "text",
-          "content": [
-            { "type": "text", "value": "Clear and concise messaging" }
-          ]
-        },
-        {
-          "type": "text",
-          "content": [
-            { "type": "text", "value": "Regular stakeholder updates" }
-          ]
-        },
-        {
-          "type": "text",
-          "content": [
-            { "type": "text", "value": "One-way communication only" }
-          ]
-        },
-        {
-          "type": "text",
-          "content": [
-            { "type": "text", "value": "Appropriate communication channels" }
-          ]
-        }
+        [
+          { "type": "text", "value": "Clear and precise messages" }
+        ],
+        [
+          { "type": "text", "value": "Regular stakeholder updates" }
+        ],
+        [
+          { "type": "text", "value": "Only one-way communication" }
+        ],
+        [
+          { "type": "text", "value": "Appropriate communication channels" }
+        ]
       ],
       "multiple": true,
       "correctAnswers": [0, 1, 3],
       "explanation": [
-        { "type": "text", "value": "Effective project communication requires clear messaging, regular updates to stakeholders, and using appropriate channels. Two-way communication is essential, not one-way communication." }
+        { "type": "text", "value": "Effective project communication requires clear messages, regular stakeholder updates, and the use of appropriate channels. Two-way communication is essential, not one-way communication." }
       ]
     },
     {
       "id": "risk-management-003",
       "categories": ["Risk Management", "Project Planning"],
-      "question": {
-        "type": "rich-text",
-        "content": [
-          { "type": "text", "value": "What is the first step in the risk management process?" }
-        ]
-      },
+      "question": [
+        { "type": "text", "value": "Consider the following risk management scenario:" },
+        { "type": "image", "src": "./img/test.jpg", "alt": "Risk management process", "caption": "Risk management cycle" },
+        { "type": "text", "value": "What is the first step in the risk management process?" }
+      ],
       "options": [
-        {
-          "type": "text",
-          "content": [
-            { "type": "text", "value": "Risk analysis" }
-          ]
-        },
-        {
-          "type": "text",
-          "content": [
-            { "type": "text", "value": "Risk identification" }
-          ]
-        },
-        {
-          "type": "text",
-          "content": [
-            { "type": "text", "value": "Risk response planning" }
-          ]
-        },
-        {
-          "type": "text",
-          "content": [
-            { "type": "text", "value": "Risk monitoring" }
-          ]
-        }
+        [
+          { "type": "text", "value": "Risk analysis" }
+        ],
+        [
+          { "type": "text", "value": "Risk identification" }
+        ],
+        [
+          { "type": "text", "value": "Risk response planning" }
+        ],
+        [
+          { "type": "text", "value": "Risk monitoring" }
+        ]
       ],
       "multiple": false,
       "correctAnswers": [1],
       "explanation": [
-        { "type": "text", "value": "Risk identification is the first step in risk management. You cannot analyze, plan responses for, or monitor risks until you have first identified what the risks are." }
+        { "type": "text", "value": "Risk identification is the first step in risk management. You cannot analyze risks, create response plans, or monitor them before you first identify them." }
       ]
     },
     {
       "id": "resource-management-004",
       "categories": ["Resource Management", "Project Planning"],
-      "question": {
-        "type": "rich-text",
-        "content": [
-          { "type": "text", "value": "Which factors should be considered when allocating resources to project activities?" }
-        ]
-      },
+      "question": [
+        { "type": "text", "value": "What factors should be considered when allocating resources to project activities?" }
+      ],
       "options": [
-        {
-          "type": "text",
-          "content": [
-            { "type": "text", "value": "Skills and competencies required" }
-          ]
-        },
-        {
-          "type": "text",
-          "content": [
-            { "type": "text", "value": "Resource availability and constraints" }
-          ]
-        },
-        {
-          "type": "text",
-          "content": [
-            { "type": "text", "value": "Project priorities and dependencies" }
-          ]
-        },
-        {
-          "type": "text",
-          "content": [
-            { "type": "text", "value": "All of the above" }
-          ]
-        }
+        [
+          { "type": "text", "value": "Required skills and competencies" },
+          { "type": "image", "src": "./img/test.jpg", "alt": "Skills Matrix", "caption": "Competency matrix" }
+        ],
+        [
+          { "type": "text", "value": "Resource availability and constraints" }
+        ],
+        [
+          { "type": "text", "value": "Project priorities and dependencies" }
+        ],
+        [
+          { "type": "text", "value": "All of the above" }
+        ]
       ],
       "multiple": false,
       "correctAnswers": [3],
       "explanation": [
-        { "type": "text", "value": "Effective resource allocation requires considering skills needed, resource availability, and project priorities. All these factors work together to ensure optimal resource utilization." }
+        { "type": "text", "value": "Effective resource allocation requires considering required skills, resource availability, and project priorities. All these factors work together to ensure optimal resource utilization." }
       ]
     },
     {
       "id": "project-lifecycle-005",
       "categories": ["Project Planning"],
-      "question": {
-        "type": "rich-text",
-        "content": [
-          { "type": "text", "value": "What are the main phases of a typical project lifecycle? (Select all that apply)" }
-        ]
-      },
+      "question": [
+        { "type": "text", "value": "What are the main phases of a typical project lifecycle? (Select all that apply)" }
+      ],
       "options": [
-        {
-          "type": "text",
-          "content": [
-            { "type": "text", "value": "Initiation" }
-          ]
-        },
-        {
-          "type": "text",
-          "content": [
-            { "type": "text", "value": "Planning" }
-          ]
-        },
-        {
-          "type": "text",
-          "content": [
-            { "type": "text", "value": "Execution" }
-          ]
-        },
-        {
-          "type": "text",
-          "content": [
-            { "type": "text", "value": "Closure" }
-          ]
-        }
+        [
+          { "type": "text", "value": "Initiation" }
+        ],
+        [
+          { "type": "text", "value": "Planning" }
+        ],
+        [
+          { "type": "text", "value": "Execution" }
+        ],
+        [
+          { "type": "text", "value": "Closure" }
+        ]
       ],
       "multiple": true,
       "correctAnswers": [0, 1, 2, 3],
       "explanation": [
-        { "type": "text", "value": "The typical project lifecycle includes Initiation, Planning, Execution, and Closure phases. Some methodologies also include Monitoring & Controlling as a separate phase." }
+        { "type": "text", "value": "The typical project lifecycle includes the phases of Initiation, Planning, Execution, and Closure. Some methodologies also include Monitoring & Controlling as a separate phase." }
+      ]
+    },
+    {
+      "id": "advanced-scenario-006",
+      "categories": ["Communication", "Risk Management", "Leadership"],
+      "question": [
+        { "type": "text", "value": "Complex scenario: You are leading a critical IT project. Consider the situation:" },
+        { "type": "video", "src": "./video/test.mp4", "caption": "Crisis communication in projects" },
+        { "type": "text", "value": "The project has technical issues and stakeholders are concerned. What is your first priority?" }
+      ],
+      "options": [
+        [
+          { "type": "text", "value": "Immediately inform all stakeholders about the problems" },
+          { "type": "image", "src": "./img/test.jpg", "alt": "Stakeholder Meeting", "caption": "Transparent communication" }
+        ],
+        [
+          { "type": "text", "value": "First find a solution, then communicate" }
+        ],
+        [
+          { "type": "text", "value": "Downplay the problems to avoid panic" }
+        ],
+        [
+          { "type": "text", "value": "Ask management for additional resources" }
+        ]
+      ],
+      "multiple": false,
+      "correctAnswers": [0],
+      "explanation": [
+        { "type": "text", "value": "In critical project situations, transparent and immediate communication is essential. Stakeholders must be informed early to maintain trust and work together to develop solutions." }
       ]
     }
   ]
