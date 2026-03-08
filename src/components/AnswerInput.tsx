@@ -1,8 +1,8 @@
-import { QuestionOption } from '@/types/quiz';
+import { RichTextContent } from '@/types/quiz';
 import QuestionRenderer from './QuestionRenderer';
 
 interface AnswerInputProps {
-  options: QuestionOption[];
+  options: RichTextContent[][];
   selectedAnswers: number[];
   multiple: boolean;
   onAnswerChange: (answerIndexes: number[]) => void;
@@ -95,7 +95,7 @@ export default function AnswerInput({
             {/* Option Content */}
             <div className="flex-1 min-w-0">
               <QuestionRenderer 
-                content={option.content} 
+                content={option} 
                 className="text-left"
               />
             </div>

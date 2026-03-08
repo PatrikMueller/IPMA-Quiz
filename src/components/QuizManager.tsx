@@ -164,7 +164,7 @@ export default function QuizManager({
             </span>
             <div className="flex-1">
               <QuestionRenderer 
-                content={currentQuestion.question.content}
+                content={currentQuestion.question}
                 className="text-lg"
               />
             </div>

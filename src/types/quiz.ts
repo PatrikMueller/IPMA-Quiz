@@ -8,26 +8,11 @@ export interface RichTextContent {
   caption?: string;
 }
 
-export interface RichTextQuestion {
-  type: 'rich-text';
-  content: RichTextContent[];
-}
-
-export interface TextQuestion {
-  type: 'text';
-  content: RichTextContent[];
-}
-
-export interface QuestionOption {
-  type: 'rich-text' | 'text';
-  content: RichTextContent[];
-}
-
 export interface QuestionData {
   id: string;
   categories: string[];
-  question: RichTextQuestion | TextQuestion;
-  options: QuestionOption[];
+  question: RichTextContent[];
+  options: RichTextContent[][];
   multiple: boolean;
   correctAnswers: number[];
   explanation: RichTextContent[];

@@ -83,7 +83,7 @@ export default function FeedbackPanel({
                   </span>
                   <div className="flex-1">
                     <QuestionRenderer 
-                      content={question.options[answerIndex].content} 
+                      content={question.options[answerIndex]} 
                       className="text-sm"
                     />
                   </div>
@@ -106,7 +106,7 @@ export default function FeedbackPanel({
                 </span>
                 <div className="flex-1">
                   <QuestionRenderer 
-                    content={question.options[answerIndex].content} 
+                    content={question.options[answerIndex]} 
                     className="text-sm"
                   />
                 </div>

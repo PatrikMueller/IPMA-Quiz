@@ -116,7 +116,7 @@ export default function SummaryScreen({ results, onRestart, onBackToSetup }: Sum
                     </div>
                     <div className="flex-1">
                       <QuestionRenderer 
-                        content={question.question.content}
+                        content={question.question}
                         className="font-medium"
                       />
                       
@@ -165,7 +165,7 @@ export default function SummaryScreen({ results, onRestart, onBackToSetup }: Sum
                               {String.fromCharCode(65 + answerIndex)}
                             </span>
                             <div className="flex-1 text-xs">
-                              <QuestionRenderer content={question.options[answerIndex].content} />
+                              <QuestionRenderer content={question.options[answerIndex]} />
                             </div>
                           </div>
                         ))
@@ -185,7 +185,7 @@ export default function SummaryScreen({ results, onRestart, onBackToSetup }: Sum
                             {String.fromCharCode(65 + answerIndex)}
                           </span>
                           <div className="flex-1 text-xs">
-                            <QuestionRenderer content={question.options[answerIndex].content} />
+                            <QuestionRenderer content={question.options[answerIndex]} />
                           </div>
                         </div>
                       ))}
