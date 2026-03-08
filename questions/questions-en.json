@@ -1,0 +1,212 @@
+{
+  "language": "en",
+  "categories": ["Project Planning", "Leadership", "Communication", "Risk Management", "Resource Management"],
+  "title": "IPMA Level D Practice Set #1",
+  "questions": [
+    {
+      "id": "pm-role-001",
+      "categories": ["Leadership", "Project Planning"],
+      "question": {
+        "type": "rich-text",
+        "content": [
+          { "type": "text", "value": "What is the primary role of a project manager in the initiation phase?" }
+        ]
+      },
+      "options": [
+        {
+          "type": "text",
+          "content": [
+            { "type": "text", "value": "Define project scope and objectives" }
+          ]
+        },
+        {
+          "type": "text",
+          "content": [
+            { "type": "text", "value": "Execute project deliverables" }
+          ]
+        },
+        {
+          "type": "text",
+          "content": [
+            { "type": "text", "value": "Monitor and control project performance" }
+          ]
+        },
+        {
+          "type": "text",
+          "content": [
+            { "type": "text", "value": "Close project and document lessons learned" }
+          ]
+        }
+      ],
+      "multiple": false,
+      "correctAnswers": [0],
+      "explanation": [
+        { "type": "text", "value": "During the initiation phase, the project manager's primary role is to define the project scope, objectives, and stakeholder requirements. This establishes the foundation for all subsequent project activities." }
+      ]
+    },
+    {
+      "id": "communication-002",
+      "categories": ["Communication", "Leadership"],
+      "question": {
+        "type": "rich-text",
+        "content": [
+          { "type": "text", "value": "Which of the following are key elements of effective project communication? (Select all that apply)" }
+        ]
+      },
+      "options": [
+        {
+          "type": "text",
+          "content": [
+            { "type": "text", "value": "Clear and concise messaging" }
+          ]
+        },
+        {
+          "type": "text",
+          "content": [
+            { "type": "text", "value": "Regular stakeholder updates" }
+          ]
+        },
+        {
+          "type": "text",
+          "content": [
+            { "type": "text", "value": "One-way communication only" }
+          ]
+        },
+        {
+          "type": "text",
+          "content": [
+            { "type": "text", "value": "Appropriate communication channels" }
+          ]
+        }
+      ],
+      "multiple": true,
+      "correctAnswers": [0, 1, 3],
+      "explanation": [
+        { "type": "text", "value": "Effective project communication requires clear messaging, regular updates to stakeholders, and using appropriate channels. Two-way communication is essential, not one-way communication." }
+      ]
+    },
+    {
+      "id": "risk-management-003",
+      "categories": ["Risk Management", "Project Planning"],
+      "question": {
+        "type": "rich-text",
+        "content": [
+          { "type": "text", "value": "What is the first step in the risk management process?" }
+        ]
+      },
+      "options": [
+        {
+          "type": "text",
+          "content": [
+            { "type": "text", "value": "Risk analysis" }
+          ]
+        },
+        {
+          "type": "text",
+          "content": [
+            { "type": "text", "value": "Risk identification" }
+          ]
+        },
+        {
+          "type": "text",
+          "content": [
+            { "type": "text", "value": "Risk response planning" }
+          ]
+        },
+        {
+          "type": "text",
+          "content": [
+            { "type": "text", "value": "Risk monitoring" }
+          ]
+        }
+      ],
+      "multiple": false,
+      "correctAnswers": [1],
+      "explanation": [
+        { "type": "text", "value": "Risk identification is the first step in risk management. You cannot analyze, plan responses for, or monitor risks until you have first identified what the risks are." }
+      ]
+    },
+    {
+      "id": "resource-management-004",
+      "categories": ["Resource Management", "Project Planning"],
+      "question": {
+        "type": "rich-text",
+        "content": [
+          { "type": "text", "value": "Which factors should be considered when allocating resources to project activities?" }
+        ]
+      },
+      "options": [
+        {
+          "type": "text",
+          "content": [
+            { "type": "text", "value": "Skills and competencies required" }
+          ]
+        },
+        {
+          "type": "text",
+          "content": [
+            { "type": "text", "value": "Resource availability and constraints" }
+          ]
+        },
+        {
+          "type": "text",
+          "content": [
+            { "type": "text", "value": "Project priorities and dependencies" }
+          ]
+        },
+        {
+          "type": "text",
+          "content": [
+            { "type": "text", "value": "All of the above" }
+          ]
+        }
+      ],
+      "multiple": false,
+      "correctAnswers": [3],
+      "explanation": [
+        { "type": "text", "value": "Effective resource allocation requires considering skills needed, resource availability, and project priorities. All these factors work together to ensure optimal resource utilization." }
+      ]
+    },
+    {
+      "id": "project-lifecycle-005",
+      "categories": ["Project Planning"],
+      "question": {
+        "type": "rich-text",
+        "content": [
+          { "type": "text", "value": "What are the main phases of a typical project lifecycle? (Select all that apply)" }
+        ]
+      },
+      "options": [
+        {
+          "type": "text",
+          "content": [
+            { "type": "text", "value": "Initiation" }
+          ]
+        },
+        {
+          "type": "text",
+          "content": [
+            { "type": "text", "value": "Planning" }
+          ]
+        },
+        {
+          "type": "text",
+          "content": [
+            { "type": "text", "value": "Execution" }
+          ]
+        },
+        {
+          "type": "text",
+          "content": [
+            { "type": "text", "value": "Closure" }
+          ]
+        }
+      ],
+      "multiple": true,
+      "correctAnswers": [0, 1, 2, 3],
+      "explanation": [
+        { "type": "text", "value": "The typical project lifecycle includes Initiation, Planning, Execution, and Closure phases. Some methodologies also include Monitoring & Controlling as a separate phase." }
+      ]
+    }
+  ]
+}
