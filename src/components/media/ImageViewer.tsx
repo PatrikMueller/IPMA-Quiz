@@ -58,7 +58,7 @@ export default function ImageViewer({
         {/* Hover overlay with expand icon - positioned in corner */}
         {!imageError && (
           <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
-            <div className="bg-white shadow-lg rounded-full p-2 border border-gray-200">
+            <div className="bg-white shadow-lg rounded-full p-2 border border-gray-200 group-hover:scale-110 group-hover:shadow-xl transition-all duration-200 transform">
               <svg 
                 className="w-4 h-4 text-gray-700" 
                 fill="none" 
