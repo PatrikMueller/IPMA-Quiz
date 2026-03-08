@@ -1,0 +1,4 @@
+1:"$Sreact.fragment"
+2:I[88825,["/IPMA-Quiz/iq-108-json-cleanup/_next/static/chunks/fceeddad8feb0094.js"],"default"]
+3:I[33739,["/IPMA-Quiz/iq-108-json-cleanup/_next/static/chunks/fceeddad8feb0094.js"],"default"]
+0:{"buildId":"Tg-LDy0Ws4uHyjmjik1yw","rsc":["$","$1","c",{"children":[null,["$","$L2",null,{"parallelRouterKey":"children","template":["$","$L3",null,{}]}]]}],"loading":null,"isPartial":false}

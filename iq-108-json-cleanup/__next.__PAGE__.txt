@@ -1,0 +1,9 @@
+1:"$Sreact.fragment"
+2:I[43672,["/IPMA-Quiz/iq-108-json-cleanup/_next/static/chunks/fceeddad8feb0094.js"],"ClientPageRoot"]
+3:I[52683,["/IPMA-Quiz/iq-108-json-cleanup/_next/static/chunks/60c5bb311deebbeb.js"],"default"]
+6:I[17482,["/IPMA-Quiz/iq-108-json-cleanup/_next/static/chunks/fceeddad8feb0094.js"],"OutletBoundary"]
+7:"$Sreact.suspense"
+0:{"buildId":"Tg-LDy0Ws4uHyjmjik1yw","rsc":["$","$1","c",{"children":[["$","$L2",null,{"Component":"$3","serverProvidedParams":{"searchParams":{},"params":{},"promises":["$@4","$@5"]}}],[["$","script","script-0",{"src":"/IPMA-Quiz/iq-108-json-cleanup/_next/static/chunks/60c5bb311deebbeb.js","async":true}]],["$","$L6",null,{"children":["$","$7",null,{"name":"Next.MetadataOutlet","children":"$@8"}]}]]}],"loading":null,"isPartial":false}
+4:{}
+5:"$0:rsc:props:children:0:props:serverProvidedParams:params"
+8:null
